@@ -11,7 +11,14 @@ if [ -f "$VIEW" ]; then
 	[ -f "$VIEW.rcbak" ] || cp "$VIEW" "$VIEW.rcbak"
 	cp /usr/share/routecraft/quickstart-main.htm "$VIEW"
 fi
-# 网络向导等入口改用原版向导页 wizard.htm（控制器备份为 .rcbak）
+# wizard.htm 在 24.10 原版就有，25.12 没有——统一处理：
+# 如果 wizard.htm 不存在，从刚备份的原版 main.htm 复制创建（作为向导 Vue 壳）
+# 两个版本最终都让控制器 render("quickstart/wizard")
+WIZ=/usr/lib/lua/luci/view/quickstart/wizard.htm
+if [ ! -f "$WIZ" ] && [ -f "$VIEW.rcbak" ]; then
+	cp "$VIEW.rcbak" "$WIZ"
+fi
+# 网络向导等入口改用 wizard.htm（控制器备份为 .rcbak）
 CTRL=/usr/lib/lua/luci/controller/quickstart.lua
 if [ -f "$CTRL" ]; then
 	[ -f "$CTRL.rcbak" ] || cp "$CTRL" "$CTRL.rcbak"
