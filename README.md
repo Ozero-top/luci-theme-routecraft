@@ -11,9 +11,28 @@ iStoreOS 的 LuCI 主题。一个源，两种模式（暖纸面浅色 / 暖炭�
 ```bash
 # 在仓库目录里
 ./install.sh
+```
 
-# 或者一条命令在线装（自动下载源码）
+一条命令在线装（curl / wget 任选）：
+
+```bash
+# curl
+curl -fsSL https://raw.githubusercontent.com/Ozero-top/luci-theme-routecraft/main/install.sh | sh
+
+# wget
 wget -qO- https://raw.githubusercontent.com/Ozero-top/luci-theme-routecraft/main/install.sh | sh
+```
+
+国内 raw 地址慢的话套加速镜像：
+
+```bash
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Ozero-top/luci-theme-routecraft/main/install.sh | sh
+```
+
+脚本在线下载源码时会自己按 `gh-proxy.com` → `ghproxy.net` → `ghfast.top` → GitHub 直连的顺序尝试，一般不用手动处理。要指定自己的镜像：
+
+```bash
+ROUTECRAFT_MIRROR=https://your.proxy/ sh install.sh
 ```
 
 装完自动启用，刷新浏览器就是。首页要重新登录一次才能取到实时数据（脚本会重载 ACL）。

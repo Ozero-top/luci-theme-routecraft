@@ -8,12 +8,17 @@
 #   ./install.sh uninstall    完整卸载并还原原版 quickstart / 主题
 #   ./install.sh status       查看当前检测结果与安装状态
 #
-# 一条命令在线安装：
+# 一条命令在线安装（curl / wget 均可）：
+#   curl -fsSL https://raw.githubusercontent.com/Ozero-top/luci-theme-routecraft/main/install.sh | sh
 #   wget -qO- https://raw.githubusercontent.com/Ozero-top/luci-theme-routecraft/main/install.sh | sh
+#
+# 国内加速（raw 地址访问慢时套一层镜像）：
+#   curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Ozero-top/luci-theme-routecraft/main/install.sh | sh
 #
 # 说明：直接把源码文件写入系统，不生成 ipk / apk。
 #       24.10 与 25.12 的目录布局一致，脚本按实际存在的文件自适应，
 #       并对 quickstart 首页 / 向导入口做与安装包完全相同的处理。
+#       在线下载源码时会自动尝试国内加速镜像，可用 ROUTECRAFT_MIRROR 指定自定义前缀。
 # ============================================================
 
 PKG="luci-theme-routecraft"
@@ -22,6 +27,9 @@ BRANCH="main"
 SRC_DIR_NAME="luci-theme-routecraft"
 MANIFEST="/usr/share/routecraft/.installed-files"
 RCBAK_SUFFIX=".rcorig"
+
+# 国内加速镜像前缀，按顺序尝试，最后回落到 GitHub 直连
+MIRRORS="https://gh-proxy.com/ https://ghproxy.net/ https://ghfast.top/"
 
 VIEW="/usr/lib/lua/luci/view/quickstart/main.htm"
 WIZ="/usr/lib/lua/luci/view/quickstart/wizard.htm"
@@ -32,6 +40,37 @@ info()  { printf '  \033[36m>\033[0m %s\n' "$*"; }
 ok()    { printf '  \033[32m+\033[0m %s\n' "$*"; }
 warn()  { printf '  \033[33m!\033[0m %s\n' "$*"; }
 die()   { printf '  \033[31mx\033[0m %s\n' "$*" >&2; exit 1; }
+
+# ---------- 下载 ----------
+# fetch <url> <outfile>：curl 优先，其次 wget
+fetch() {
+	rm -f "$2"
+	if command -v curl >/dev/null 2>&1; then
+		curl -fsSL --connect-timeout 8 --max-time 180 -o "$2" "$1" && [ -s "$2" ]
+	elif command -v wget >/dev/null 2>&1; then
+		wget -q -T 25 -O "$2" "$1" && [ -s "$2" ]
+	else
+		return 127
+	fi
+}
+
+# download <原始URL> <outfile>：先走镜像，失败再直连
+download() {
+	_orig="$1"; _out="$2"
+	for _m in ${ROUTECRAFT_MIRROR:-} $MIRRORS; do
+		_m="${_m%/}"
+		if fetch "$_m/$_orig" "$_out"; then
+			LAST_SOURCE="$_m"
+			return 0
+		fi
+	done
+	if fetch "$_orig" "$_out"; then
+		LAST_SOURCE="direct"
+		return 0
+	fi
+	return 1
+}
+
 
 need_root() {
 	[ "$(id -u)" = "0" ] || die "需要 root 权限运行（请用 root 登录或在命令前加 sudo）"
@@ -86,17 +125,20 @@ resolve_source() {
 	fi
 
 	# 在线下载（管道执行 / 单独下载脚本的场景）
-	info "本地未找到源码，正在从 GitHub 下载..."
+	info "本地未找到源码，开始下载（自动尝试国内加速镜像）..."
 	TMP="/tmp/routecraft-install.$$"
 	rm -rf "$TMP"; mkdir -p "$TMP" || die "无法创建临时目录 $TMP"
 	URL="https://github.com/$REPO/archive/refs/heads/$BRANCH.tar.gz"
 	TGZ="$TMP/src.tar.gz"
-	if command -v wget >/dev/null 2>&1; then
-		wget -qO "$TGZ" "$URL" || die "下载失败：$URL"
-	elif command -v curl >/dev/null 2>&1; then
-		curl -fsSL -o "$TGZ" "$URL" || die "下载失败：$URL"
+	LAST_SOURCE=""
+	if ! download "$URL" "$TGZ"; then
+		rm -rf "$TMP"
+		die "下载失败（镜像与 GitHub 均不可用）。可设置 ROUTECRAFT_MIRROR 指定镜像前缀，或 git clone 后本地运行。"
+	fi
+	if [ "$LAST_SOURCE" = "direct" ]; then
+		ok "已从 GitHub 直连下载"
 	else
-		die "系统没有 wget / curl，无法在线下载。请 git clone 仓库后在目录内运行本脚本。"
+		ok "已通过镜像加速下载：$LAST_SOURCE"
 	fi
 	tar -xzf "$TGZ" -C "$TMP" || die "解压失败"
 	for d in "$TMP"/*/"$SRC_DIR_NAME"; do
@@ -104,7 +146,7 @@ resolve_source() {
 	done
 	[ -n "${SRC:-}" ] && [ -d "$SRC" ] || die "下载包内未找到 $SRC_DIR_NAME 目录"
 	TARBALL_TMP="$TMP"
-	ok "已下载源码到 $SRC"
+	ok "源码就绪：$SRC"
 }
 
 cleanup_tmp() {
