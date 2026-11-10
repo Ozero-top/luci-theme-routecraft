@@ -1,24 +1,38 @@
 # RouteCraft
 
-iStoreOS 24.10 的 LuCI 主题。一个包，两种模式（暖纸面浅色 / 暖炭灰深色），顶栏 MODE 按钮一键切。
+iStoreOS 的 LuCI 主题。一个源，两种模式（暖纸面浅色 / 暖炭灰深色），顶栏 MODE 按钮一键切。
 
-**只测过 iStoreOS 24.10**，别的固件也不打算适配。写这个纯个人喜好，不做通用。
+适配 iStoreOS 24.10 与 25.12（apk 版），同一份源码，由 `install.sh` 自动识别版本后写入。别的固件不打算适配。
 
 ## 装
 
+不用装包，跑脚本就行。脚本会自动识别 iStoreOS 版本（24.10 / 25.12）并写入对应的文件：
+
 ```bash
-opkg install luci-theme-routecraft_1.0.0-25_all.ipk
+# 在仓库目录里
+./install.sh
+
+# 或者一条命令在线装（自动下载源码）
+wget -qO- https://raw.githubusercontent.com/Ozero-top/luci-theme-routecraft/main/install.sh | sh
 ```
 
-装完自动启用，刷新浏览器就是。首页要重新登录一次才能取到实时数据（包装了 ACL）。
+装完自动启用，刷新浏览器就是。首页要重新登录一次才能取到实时数据（脚本会重载 ACL）。
 
 ## 卸
 
 ```bash
-opkg remove luci-theme-routecraft
+./install.sh uninstall
 ```
 
-自动还原 main.htm、控制器、UCI 主题，清模板缓存。quickstart 原版功能会完整回来。
+自动还原 main.htm、控制器、UCI 主题，删除写入的文件并清模板缓存。quickstart 原版功能会完整回来。
+
+## 状态
+
+```bash
+./install.sh status
+```
+
+打印识别到的系统版本、包管理器、quickstart 文件是否存在、当前主题。
 
 ## 它干了啥
 
@@ -45,15 +59,7 @@ luci-theme-routecraft/
 │   ├── menu-routecraft.js        侧栏菜单模块
 │   └── view/routecraft/sysauth.js 登录交互
 ├── etc/uci-defaults/
-└── CONTROL/    postinst（启用主题 + 替换模板）/ prerm（还原）/ postrm（清缓存）
+└── CONTROL/    安装包用的脚本（postinst / prerm / postrm）
 ```
 
-## 重新打包
-
-不依赖 OpenWrt SDK，本机 Python 就行：
-
-```bash
-python build-ipk.py
-```
-
-产物在 `dist/`。脚本做 LF 转换、版本时间戳注入、ustar 格式内层 tar、脚本 0755。
+`install.sh` 的逻辑与 `CONTROL/` 里的脚本一致，只是改为直接写文件，因此不再需要打包。

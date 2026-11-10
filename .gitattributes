@@ -1,0 +1,7 @@
+# 保证 shell 脚本一律以 LF 提交/检出，避免路由器上 sh 报错
+*.sh    text eol=lf
+CONTROL/postinst text eol=lf
+CONTROL/prerm    text eol=lf
+CONTROL/postrm   text eol=lf
+CONTROL/preinst  text eol=lf
+etc/uci-defaults/* text eol=lf

@@ -3,6 +3,7 @@ _ref_istoreos/
 .screenshots/
 .trae-html-share-packages/
 *.ipk
+*.apk
 *.pyc
 __pycache__/
 .DS_Store
