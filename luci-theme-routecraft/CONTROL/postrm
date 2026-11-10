@@ -1,0 +1,14 @@
+#!/bin/sh
+[ -n "${IPKG_INSTROOT}" ] && exit 0
+
+# 卸载后最终清理：再清一次缓存（删完包文件后确保不留 RouteCraft 痕迹）
+rm -f /tmp/luci-indexcache 2>/dev/null
+rm -rf /tmp/luci-templatecache 2>/dev/null
+rm -rf /tmp/luci-modulecache 2>/dev/null
+
+# 尝试让 luci 进程重新加载模板（如果 rpcd 存在）
+if [ -x /etc/init.d/rpcd ]; then
+	/etc/init.d/rpcd reload >/dev/null 2>&1
+fi
+
+exit 0

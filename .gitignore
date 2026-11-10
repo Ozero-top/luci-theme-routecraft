@@ -1,0 +1,9 @@
+dist/
+_ref_istoreos/
+.screenshots/
+.trae-html-share-packages/
+*.ipk
+*.pyc
+__pycache__/
+.DS_Store
+Thumbs.db

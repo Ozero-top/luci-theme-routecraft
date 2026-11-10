@@ -1,0 +1,148 @@
+<%+header%>
+<%
+  local build_url = luci.dispatcher.build_url
+-%>
+<link rel="stylesheet" href="/luci-static/routecraft/home.css?v=RCVERSION">
+<div id="rc-home">
+
+	<!-- HERO -->
+	<section class="rch-hero rch-rise">
+		<div class="rch-hero-l">
+			<div class="rch-eyebrow"><span class="rch-dot-live"></span>SYSTEM STATUS — LIVE</div>
+			<h1><span id="rch-host">—</span> <em>Online.</em></h1>
+			<div class="rch-hero-sub">负载 <b id="rch-hero-load">—</b> · 内存可用 <b id="rch-hero-mem">—</b> · 已运行 <b id="rch-hero-up">—</b></div>
+		</div>
+		<div class="rch-rate-box">
+			<div class="rch-rate-cell rx">
+				<label>▼ DOWNLOAD · <span id="rch-rx-dev">wan</span></label>
+				<span class="val" id="rch-rx">0.0</span><span class="unit" id="rch-rx-unit">Mbps</span>
+			</div>
+			<div class="rch-rate-cell tx">
+				<label>▲ UPLOAD · <span id="rch-tx-dev">wan</span></label>
+				<span class="val" id="rch-tx">0.0</span><span class="unit" id="rch-tx-unit">Mbps</span>
+			</div>
+		</div>
+	</section>
+
+	<!-- SEC.01 核心指标 -->
+	<div class="rch-sec-head rch-rise"><span class="no">SEC.01</span><h2>核心指标 Vitals</h2><span class="note">采样间隔 2.0s · 数据源 ubus</span></div>
+	<section class="rch-cards">
+		<div class="rch-card rch-rise"><i class="rch-corner"></i>
+			<div class="rch-card-label"><h3>设备 Device</h3><span class="tag" id="rch-c-arch">—</span></div>
+			<div class="rch-big-mono" id="rch-c-up">—</div>
+			<div class="rch-stat-lines">
+				<div class="rch-stat-line"><span>型号</span><b id="rch-c-model">—</b></div>
+				<div class="rch-stat-line"><span>固件</span><b id="rch-c-fw">—</b></div>
+				<div class="rch-stat-line"><span>CPU</span><b id="rch-c-cpu">—</b></div>
+				<div class="rch-stat-line"><span>温度</span><b id="rch-c-temp">—</b></div>
+				<div class="rch-stat-line"><span>内核</span><b id="rch-c-kernel">—</b></div>
+				<div class="rch-stat-line"><span>本地时间</span><b id="rch-c-time">—</b></div>
+			</div>
+		</div>
+		<div class="rch-card rch-rise"><i class="rch-corner"></i>
+			<div class="rch-card-label"><h3>负载 Loadavg</h3><span class="tag">/proc/loadavg</span></div>
+			<div class="rch-big-mono" id="rch-load-big">—</div>
+			<div class="rch-load-cells">
+				<div class="rch-load-cell"><label>1 MIN</label><span id="rch-load1">—</span></div>
+				<div class="rch-load-cell"><label>5 MIN</label><span id="rch-load5">—</span></div>
+				<div class="rch-load-cell"><label>15 MIN</label><span id="rch-load15">—</span></div>
+			</div>
+		</div>
+		<div class="rch-card rch-rise"><i class="rch-corner"></i>
+			<div class="rch-card-label"><h3>内存 Memory</h3><span class="tag" id="rch-mem-total">—</span></div>
+			<div class="rch-big-mono"><span id="rch-mem-pct">—</span><small> % USED</small></div>
+			<div class="rch-meter"><div class="fillbar" id="rch-mem-bar" style="width:0%"></div></div>
+			<div class="rch-stat-line"><span>可用</span><b id="rch-mem-avail">—</b></div>
+			<div class="rch-stat-line"><span>缓存 buffered</span><b id="rch-mem-buf">—</b></div>
+		</div>
+		<div class="rch-card rch-rise"><i class="rch-corner"></i>
+			<div class="rch-card-label"><h3>存储 Storage</h3><span class="tag">rootfs</span></div>
+			<div class="rch-big-mono"><span id="rch-sto-pct">—</span><small> % USED</small></div>
+			<div class="rch-meter"><div class="fillbar" id="rch-sto-bar" style="width:0%"></div></div>
+			<div class="rch-stat-line"><span>已用</span><b id="rch-sto-used">—</b></div>
+			<div class="rch-stat-line"><span>总计</span><b id="rch-sto-total">—</b></div>
+		</div>
+	</section>
+
+	<!-- SEC.02 实时流量 -->
+	<div class="rch-sec-head rch-rise"><span class="no">SEC.02</span><h2>实时流量 Throughput</h2><span class="note" id="rch-chart-note">窗口 120s</span></div>
+	<section class="rch-chart-card rch-rise">
+		<div class="rch-chart-head">
+			<h3>THROUGHPUT MONITOR</h3>
+			<div class="rch-legend">
+				<span class="rx"><i></i>RX 下行</span>
+				<span class="tx"><i></i>TX 上行</span>
+			</div>
+		</div>
+		<div class="rch-chart-body">
+			<canvas id="rch-traffic"></canvas>
+			<div class="rch-ruler-x"></div>
+		</div>
+	</section>
+
+	<!-- SEC.03 接口 -->
+	<div class="rch-sec-head rch-rise"><span class="no">SEC.03</span><h2>物理网口 Physical Ports</h2><span class="note">network/interface/status · 链路状态</span></div>
+	<section class="rch-duo">
+		<div class="rch-iface rch-rise" id="rch-iface-list"></div>
+		<div class="rch-card rch-rise" style="padding:0;overflow:hidden">
+			<div class="rch-card-label" style="padding:16px 16px 0"><h3>WAN 详情 Uplink</h3><span class="tag" id="rch-wan-proto">—</span></div>
+			<table class="rch-table">
+				<tbody id="rch-wan-detail"></tbody>
+			</table>
+		</div>
+	</section>
+
+	<!-- SEC.04 服务与操作 -->
+	<div class="rch-sec-head rch-rise"><span class="no">SEC.04</span><h2>服务与操作 Services / Ops</h2><span class="note">rc · procd</span></div>
+	<section class="rch-duo2">
+		<div class="rch-svc rch-rise" id="rch-svc-list"></div>
+		<div class="rch-ops rch-rise">
+			<a class="rch-op-btn" href="<%=build_url('admin/network/network')%>">接口设置<span class="kbd">NET → INTERFACES</span></a>
+			<a class="rch-op-btn" href="<%=build_url('admin/network/wireless')%>">无线设置<span class="kbd">NET → WIRELESS</span></a>
+			<a class="rch-op-btn" href="<%=build_url('admin/istore')%>">iStore 应用商店<span class="kbd">APP → ISTORE</span></a>
+			<a class="rch-op-btn" href="<%=build_url('admin/system/flash')%>">备份 / 固件升级<span class="kbd">SYS → BACKUP / FLASH</span></a>
+			<a class="rch-op-btn danger" href="<%=build_url('admin/system/reboot')%>">重启路由<span class="kbd">SYS → REBOOT</span></a>
+		</div>
+	</section>
+
+	<!-- SEC.05 快捷设置（原 quickstart 功能） -->
+	<div class="rch-sec-head rch-rise"><span class="no">SEC.05</span><h2>快捷设置 Quick Config</h2><span class="note">istore api · 与原首页同一数据源</span></div>
+	<section class="rch-rise">
+		<div class="rch-qc-grid">
+			<a class="rch-op-btn" href="<%=build_url('admin/network_guide')%>">网络向导<span class="kbd">WIZARD →</span></a>
+			<button class="rch-op-btn" type="button" data-qc="devices">局域网设备管理<span class="kbd" id="rch-qc-devcount">—</span></button>
+			<button class="rch-op-btn" type="button" data-qc="lan">内网配置<span class="kbd">LAN / DHCP</span></button>
+			<button class="rch-op-btn" type="button" data-qc="dns">DNS 配置<span class="kbd" id="rch-qc-dnsmode">—</span></button>
+			<button class="rch-op-btn" type="button" data-qc="src">软件源<span class="kbd" id="rch-qc-srcname">—</span></button>
+			<a class="rch-op-btn" href="#" id="rch-qc-ttyd">终端<span class="kbd">TTYD →</span></a>
+			<a class="rch-op-btn" href="<%=build_url('admin/system/flash')%>">固件更新<span class="kbd">SYS → FLASH</span></a>
+			<a class="rch-op-btn" href="<%=build_url('admin/status/logs')%>">日志查看<span class="kbd">STATUS → LOGS</span></a>
+		</div>
+		<div class="rch-qc-links">
+			<span class="rch-qc-links-label">磁盘工具</span>
+			<a href="<%=build_url('admin/nas/raid')%>">RAID 管理</a>
+			<a href="<%=build_url('admin/nas/smart')%>">S.M.A.R.T.</a>
+			<a href="<%=build_url('admin/nas/diskman')%>">磁盘管理</a>
+			<a href="<%=build_url('admin/system/mounts')%>">挂载点</a>
+			<button class="rch-op-btn danger rch-qc-reboot" type="button" data-qc="maint">系统维护<span class="kbd">REBOOT</span></button>
+		</div>
+	</section>
+
+	<footer class="rch-footer rch-rise">
+		<span>ROUTECRAFT · QUICKSTART REDESIGN · DATA VIA UBUS + ISTORE API</span>
+		<div class="compat"><span>iStoreOS</span><span>24.10</span></div>
+	</footer>
+
+</div>
+<div id="rch-modal" hidden>
+	<div class="rch-modal-mask" data-close="1"></div>
+	<div class="rch-modal-box" role="dialog">
+		<div class="rch-modal-head"><h3 id="rch-modal-title">—</h3><button type="button" class="rch-modal-x" data-close="1">×</button></div>
+		<div class="rch-modal-body" id="rch-modal-body"></div>
+	</div>
+</div>
+<script>
+window.rcHomeToken = "<%=token%>";
+</script>
+<script src="/luci-static/routecraft/home.js?v=RCVERSION"></script>
+<%+footer%>

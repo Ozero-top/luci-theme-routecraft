@@ -1,0 +1,11 @@
+{
+	"luci-theme-routecraft": {
+		"description": "RouteCraft home dashboard status data",
+		"read": {
+			"ubus": {
+				"network.device": [ "status" ],
+				"iwinfo": [ "info" ]
+			}
+		}
+	}
+}

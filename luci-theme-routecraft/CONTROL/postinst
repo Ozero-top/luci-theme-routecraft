@@ -1,0 +1,22 @@
+#!/bin/sh
+[ -n "${IPKG_INSTROOT}" ] && exit 0
+uci -q batch <<EOF
+set luci.themes.RouteCraft=/luci-static/routecraft
+set luci.main.mediaurlbase=/luci-static/routecraft
+commit luci
+EOF
+# 替换 quickstart 首页为 RouteCraft 版本（原文件备份为 .rcbak）
+VIEW=/usr/lib/lua/luci/view/quickstart/main.htm
+if [ -f "$VIEW" ]; then
+	[ -f "$VIEW.rcbak" ] || cp "$VIEW" "$VIEW.rcbak"
+	cp /usr/share/routecraft/quickstart-main.htm "$VIEW"
+fi
+# 网络向导等入口改用原版向导页 wizard.htm（控制器备份为 .rcbak）
+CTRL=/usr/lib/lua/luci/controller/quickstart.lua
+if [ -f "$CTRL" ]; then
+	[ -f "$CTRL.rcbak" ] || cp "$CTRL" "$CTRL.rcbak"
+	sed -i 's#render("quickstart/main"#render("quickstart/wizard"#' "$CTRL"
+fi
+# 让 rpcd 重新读取 ACL（network.device status 授权）
+/etc/init.d/rpcd reload >/dev/null 2>&1
+exit 0

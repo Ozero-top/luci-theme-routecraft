@@ -1,0 +1,9 @@
+Package: luci-theme-routecraft
+Version: RCVER
+Depends: luci-base
+Section: luci
+Priority: optional
+Architecture: all
+Installed-Size: RCSIZE
+Maintainer: RouteCraft
+Description: RouteCraft industrial console theme for iStoreOS. Single package with light/dark dual mode, styled login page and quickstart homepage integration.

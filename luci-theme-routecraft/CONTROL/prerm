@@ -1,0 +1,43 @@
+#!/bin/sh
+[ -n "${IPKG_INSTROOT}" ] && exit 0
+
+# 1. 还原 main.htm 为原版 Vue 壳
+VIEW=/usr/lib/lua/luci/view/quickstart/main.htm
+if [ -f "$VIEW.rcbak" ]; then
+	mv -f "$VIEW.rcbak" "$VIEW"
+fi
+
+# 2. 还原 quickstart 控制器（render("quickstart/main")）
+CTRL=/usr/lib/lua/luci/controller/quickstart.lua
+if [ -f "$CTRL.rcbak" ]; then
+	mv -f "$CTRL.rcbak" "$CTRL"
+fi
+
+# 3. UCI：还原主题（自动检测可用主题，避免硬编码不存在的路径）
+CURRENT="$(uci -q get luci.main.mediaurlbase)"
+if [ "$CURRENT" = "/luci-static/routecraft" ]; then
+	NEW=""
+	for cand in "/luci-static/argon" "/luci-static/bootstrap" "/luci-static/core"; do
+		if [ -d "/www${cand}" ]; then
+			NEW="$cand"
+			break
+		fi
+	done
+	if [ -n "$NEW" ]; then
+		uci set luci.main.mediaurlbase="$NEW"
+	else
+		# 所有候选都不存在，清空让 LuCI fallback
+		uci del luci.main.mediaurlbase
+	fi
+	uci commit luci
+fi
+# 清理 RouteCraft 主题注册条目
+uci del luci.themes.RouteCraft 2>/dev/null
+uci commit luci 2>/dev/null
+
+# 4. 清 LuCI 缓存，让还原后的模板立即生效
+rm -f /tmp/luci-indexcache 2>/dev/null
+rm -rf /tmp/luci-templatecache 2>/dev/null
+rm -rf /tmp/luci-modulecache 2>/dev/null
+
+exit 0

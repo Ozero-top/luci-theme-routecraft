@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RouteCraft · LuCI Console — 主题预览</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chivo:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F5F3ED;
+  --paper-2:#EEEBE3;
+  --paper-3:#E5E2D6;
+  --ink:#26292E;
+  --shell:#26292E;
+  --shell-2:#2F3339;
+  --shell-3:#3B4048;
+  --line:#DAD6C9;
+  --line-soft:#E7E4D9;
+  --mute:#94907F;
+  --mute-2:#787468;
+  --orange:#C65D3B;
+  --orange-soft:#D67A55;
+  --steel:#5F7C8E;
+  --good:#4E8A6A;
+  --disp:'Chivo', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --mono:'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', monospace;
+}
+/* ── 深色模式：暖炭仪器夜航 ── */
+body.dark{
+  --paper:#1E2124;
+  --paper-2:#25282C;
+  --paper-3:#2D3136;
+  --ink:#E4E0D4;
+  --shell:#16181B;
+  --shell-2:#1E2124;
+  --shell-3:#2C3035;
+  --line:#3A3F45;
+  --line-soft:#2E3237;
+  --mute:#7B776A;
+  --mute-2:#9C9787;
+  --orange:#D67A55;
+  --orange-soft:#E08E6B;
+  --steel:#7E97A8;
+  --good:#6FA987;
+}
+body.dark.grain::after{mix-blend-mode:overlay;opacity:.3}
+.mode-btn{
+  height:100%;padding:0 18px;background:none;border:none;cursor:pointer;
+  border-left:1px solid var(--shell-3);color:var(--paper);
+  font-family:var(--mono);font-size:10px;letter-spacing:.22em;transition:color .2s;
+}
+.mode-btn:hover{color:var(--orange-soft)}
+.main,.sidebar,.topbar,.card,.iface-row,.op-btn,.chart-card,.load-cell,.meter,td,th{transition:background-color .3s ease,border-color .3s ease,color .3s ease}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scrollbar-color:var(--shell-3) transparent}
+body{
+  font-family:var(--disp);
+  background:var(--shell);
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+  font-variant-numeric:tabular-nums;
+}
+/* ---------- 技术网格 & 颗粒 ---------- */
+.grid-bg{
+  background-image:
+    linear-gradient(var(--line-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+  background-size:28px 28px;
+}
+.grain::after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:200;opacity:.5;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+}
+/* ---------- 布局骨架 ---------- */
+.app{display:grid;grid-template-columns:248px 1fr;grid-template-rows:52px 1fr;height:100vh;overflow:hidden}
+/* ---------- 顶栏 ---------- */
+.topbar{
+  grid-column:1/3;display:flex;align-items:stretch;
+  background:var(--shell);color:var(--paper);
+  border-bottom:1px solid var(--shell-3);
+}
+.brand{display:flex;align-items:center;gap:12px;width:248px;padding:0 18px;border-right:1px solid var(--shell-3)}
+.brand-mark{width:22px;height:22px;position:relative;flex:none}
+.brand-mark::before{content:"";position:absolute;inset:0;background:var(--orange);clip-path:polygon(0 100%,0 0,100% 100%)}
+.brand-name{font-weight:900;letter-spacing:.14em;font-size:14px}
+.brand-sub{font-family:var(--mono);font-size:9px;color:var(--mute);letter-spacing:.22em;margin-top:1px}
+.crumb{display:flex;align-items:center;gap:10px;padding:0 22px;font-family:var(--mono);font-size:11px;color:var(--mute);letter-spacing:.08em}
+.crumb b{color:var(--paper);font-weight:500}
+.crumb .sep{color:var(--orange)}
+.top-right{margin-left:auto;display:flex;align-items:center;gap:0}
+.chip{
+  display:flex;flex-direction:column;justify-content:center;gap:2px;
+  padding:0 18px;border-left:1px solid var(--shell-3);height:100%;
+}
+.chip label{font-family:var(--mono);font-size:8px;letter-spacing:.24em;color:var(--mute)}
+.chip span{font-family:var(--mono);font-size:12px;color:var(--paper)}
+.chip .accent{color:var(--orange)}
+.power{
+  width:52px;display:grid;place-items:center;border-left:1px solid var(--shell-3);
+  cursor:pointer;transition:background .2s;
+}
+.power:hover{background:var(--orange)}
+.power:hover svg{stroke:#26292E}
+.power svg{width:16px;height:16px;stroke:var(--paper);fill:none;stroke-width:2;transition:stroke .2s}
+/* ---------- 侧边栏 ---------- */
+.sidebar{
+  background:var(--shell);color:var(--paper);
+  display:flex;flex-direction:column;overflow-y:auto;
+  border-right:1px solid var(--shell-3);
+}
+.sidebar::-webkit-scrollbar{width:0}
+.nav{padding:14px 0;flex:1}
+.nav-group-label{
+  font-family:var(--mono);font-size:9px;letter-spacing:.28em;color:var(--mute);
+  padding:18px 18px 8px;
+}
+.nav-item{
+  display:flex;align-items:center;gap:12px;
+  padding:9px 18px;cursor:pointer;position:relative;
+  font-size:13px;color:#B9BDBD;transition:color .15s,background .15s;
+  user-select:none;
+}
+.nav-item .idx{font-family:var(--mono);font-size:9px;color:var(--mute-2);width:16px;transition:color .15s}
+.nav-item:hover{color:var(--paper);background:rgba(255,255,255,.03)}
+.nav-item:hover .idx{color:var(--orange)}
+.nav-item.active{color:var(--paper);background:linear-gradient(90deg, rgba(198,93,59,.16), transparent 70%)}
+.nav-item.active::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--orange)}
+.nav-item.active .idx{color:var(--orange)}
+.nav-item .arrow{margin-left:auto;font-family:var(--mono);font-size:9px;color:var(--mute-2);transition:transform .25s}
+.nav-item.open .arrow{transform:rotate(90deg);color:var(--orange)}
+.nav-sub{overflow:hidden;max-height:0;transition:max-height .3s ease}
+.nav-sub.open{max-height:300px}
+.nav-sub .nav-item{padding-left:46px;font-size:12px}
+.nav-sub .nav-item.active{background:linear-gradient(90deg, rgba(198,93,59,.2), transparent 70%)}
+/* 铭牌 */
+.plate{
+  margin:14px;border:1px solid var(--shell-3);background:var(--shell-2);
+  padding:14px;position:relative;
+}
+.plate::before,.plate::after,
+.corner::before,.corner::after{content:"";position:absolute;width:8px;height:8px;border-color:var(--orange);border-style:solid}
+.plate::before{top:-1px;left:-1px;border-width:1px 0 0 1px}
+.plate::after{bottom:-1px;right:-1px;border-width:0 1px 1px 0}
+.plate-title{font-family:var(--mono);font-size:9px;letter-spacing:.24em;color:var(--mute);margin-bottom:10px}
+.plate-row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:#B9BDBD;padding:3px 0}
+.plate-row b{color:var(--paper);font-weight:500}
+.plate-row .accent{color:var(--orange)}
+.plate .barcode{
+  margin-top:12px;height:22px;
+  background:repeating-linear-gradient(90deg,#B9BDBD 0 1px,transparent 1px 3px,#B9BDBD 3px 6px,transparent 6px 7px);
+  opacity:.5;
+}
+/* ---------- 主区 ---------- */
+.main{background:var(--paper);overflow-y:auto;position:relative}
+.main::-webkit-scrollbar{width:10px}
+.main::-webkit-scrollbar-thumb{background:var(--line);border:3px solid var(--paper)}
+.content{padding:28px 32px 48px;max-width:1240px;margin:0 auto}
+/* HERO */
+.hero{display:flex;align-items:flex-end;justify-content:space-between;gap:32px;margin-bottom:26px}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--mono);font-size:10px;letter-spacing:.26em;color:var(--mute-2);
+  border:1px solid var(--line);padding:5px 10px;margin-bottom:16px;background:var(--paper-2);
+}
+.dot-live{width:6px;height:6px;background:var(--good);border-radius:50%;animation:blink 1.6s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.hero h1{
+  font-size:52px;line-height:.96;font-weight:900;letter-spacing:-.01em;
+  text-transform:uppercase;
+}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero-sub{font-family:var(--mono);font-size:11px;color:var(--mute-2);margin-top:12px;letter-spacing:.06em}
+.hero-sub b{color:var(--ink);font-weight:600}
+.rate-box{
+  flex:none;display:flex;gap:0;border:1px solid var(--shell);background:var(--shell);color:var(--paper);
+  box-shadow:6px 6px 0 var(--line);
+}
+.rate-cell{padding:14px 22px;min-width:150px}
+.rate-cell+.rate-cell{border-left:1px solid var(--shell-3)}
+.rate-cell label{font-family:var(--mono);font-size:9px;letter-spacing:.24em;color:var(--mute);display:block;margin-bottom:6px}
+.rate-cell .val{font-family:var(--mono);font-size:26px;font-weight:600;line-height:1}
+.rate-cell .unit{font-size:11px;color:var(--mute);margin-left:4px}
+.rate-cell.rx .val{color:var(--orange-soft)}
+.rate-cell.tx .val{color:#9AB6C4}
+/* 区块标题 */
+.sec-head{display:flex;align-items:baseline;gap:14px;margin:34px 0 14px;border-bottom:2px solid var(--ink);padding-bottom:8px}
+.sec-head h2{font-size:15px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}
+.sec-head .no{font-family:var(--mono);font-size:10px;color:var(--orange);letter-spacing:.1em}
+.sec-head .note{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--mute);letter-spacing:.1em}
+/* 卡片 */
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.card{
+  background:var(--paper-2);border:1px solid var(--line);position:relative;
+  padding:16px 16px 14px;transition:transform .18s ease, box-shadow .18s ease;
+}
+.card:hover{transform:translate(-2px,-2px);box-shadow:4px 4px 0 var(--ink)}
+.card .corner::before{top:-1px;left:-1px;border-width:1px 0 0 1px}
+.card .corner::after{top:-1px;right:-1px;border-width:1px 1px 0 0}
+.card .corner i::before,.card .corner i::after{content:"";position:absolute;width:8px;height:8px;border-color:var(--mute);border-style:solid;bottom:-1px}
+.card .corner i::before{left:-1px;border-width:0 0 1px 1px}
+.card .corner i::after{right:-1px;border-width:0 1px 1px 0}
+.card-label{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
+.card-label h3{font-family:var(--mono);font-size:9px;letter-spacing:.24em;color:var(--mute-2);text-transform:uppercase;font-weight:500}
+.card-label .tag{font-family:var(--mono);font-size:9px;color:var(--orange)}
+.gauge-wrap{display:flex;align-items:center;gap:14px}
+.gauge{width:74px;height:74px;flex:none}
+.gauge .track{stroke:var(--line);fill:none;stroke-width:6}
+.gauge .fill{stroke:var(--orange);fill:none;stroke-width:6;stroke-linecap:butt;transition:stroke-dashoffset .8s cubic-bezier(.2,.8,.2,1)}
+.gauge .tick{stroke:var(--mute);stroke-width:1}
+.gauge-num{font-family:var(--mono);font-size:26px;font-weight:600;line-height:1}
+.gauge-num small{font-size:12px;color:var(--mute)}
+.stat-lines{margin-top:2px}
+.stat-line{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--mute-2);padding:3px 0;border-top:1px dashed var(--line)}
+.stat-line b{color:var(--ink);font-weight:500}
+.spark{display:block;width:100%;height:40px;margin-top:6px}
+.meter{height:10px;border:1px solid var(--ink);position:relative;margin:10px 0 4px;background:var(--paper)}
+.meter .fillbar{position:absolute;inset:1px auto 1px 1px;background:repeating-linear-gradient(-45deg,var(--orange) 0 4px,var(--orange-soft) 4px 8px);transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.meter .th{position:absolute;top:-4px;bottom:-4px;width:1px;background:var(--ink)}
+.big-mono{font-family:var(--mono);font-size:30px;font-weight:600;letter-spacing:-.02em}
+.big-mono small{font-size:12px;color:var(--mute);font-weight:400}
+.load-cells{display:flex;gap:8px;margin-top:8px}
+.load-cell{flex:1;border:1px solid var(--line);padding:8px 6px;text-align:center;background:var(--paper)}
+.load-cell label{display:block;font-family:var(--mono);font-size:8px;letter-spacing:.2em;color:var(--mute);margin-bottom:4px}
+.load-cell span{font-family:var(--mono);font-size:15px;font-weight:600}
+/* 流量图 */
+.chart-card{background:var(--paper-2);border:1px solid var(--line);padding:0;position:relative}
+.chart-head{display:flex;align-items:center;gap:16px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.chart-head h3{font-family:var(--mono);font-size:10px;letter-spacing:.22em;color:var(--mute-2);font-weight:500}
+.legend{margin-left:auto;display:flex;gap:14px;font-family:var(--mono);font-size:10px;color:var(--mute-2)}
+.legend i{display:inline-block;width:16px;height:2px;vertical-align:middle;margin-right:6px}
+.legend .rx i{background:var(--orange)}
+.legend .tx i{background:var(--steel)}
+.chart-body{position:relative;height:230px}
+.chart-body canvas{display:block;width:100%;height:100%}
+.ruler-x{position:absolute;left:0;right:0;bottom:0;height:10px;
+  background:repeating-linear-gradient(90deg,var(--mute) 0 1px,transparent 1px 28px);
+  opacity:.35}
+/* 接口 + 设备 */
+.duo{display:grid;grid-template-columns:5fr 7fr;gap:14px}
+.iface{display:flex;flex-direction:column;gap:10px}
+.iface-row{
+  display:grid;grid-template-columns:34px 1fr auto;gap:12px;align-items:center;
+  border:1px solid var(--line);background:var(--paper-2);padding:12px 14px;
+  transition:transform .15s, box-shadow .15s;
+}
+.iface-row:hover{transform:translateX(3px);box-shadow:-3px 3px 0 var(--ink)}
+.iface-ic{
+  width:34px;height:34px;border:1px solid var(--ink);display:grid;place-items:center;
+  font-family:var(--mono);font-size:9px;font-weight:600;background:var(--paper);
+}
+.iface-ic.on{background:var(--ink);color:var(--orange)}
+.iface-row h4{font-size:13px;font-weight:700}
+.iface-row .sub{font-family:var(--mono);font-size:10px;color:var(--mute-2);margin-top:2px}
+.sig{display:flex;align-items:flex-end;gap:2px;height:16px}
+.sig i{width:4px;background:var(--line)}
+.sig i.on{background:var(--orange)}
+.sig i:nth-child(1){height:4px}.sig i:nth-child(2){height:7px}.sig i:nth-child(3){height:10px}.sig i:nth-child(4){height:13px}.sig i:nth-child(5){height:16px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{
+  font-family:var(--mono);font-size:9px;letter-spacing:.2em;color:var(--mute-2);
+  text-align:left;padding:8px 12px;border-bottom:2px solid var(--ink);font-weight:500;
+}
+tbody td{padding:9px 12px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11px}
+tbody tr{transition:background .12s}
+tbody tr:hover{background:var(--paper-3)}
+tbody td:first-child{font-family:var(--disp);font-weight:700;font-size:12px}
+.pill{display:inline-block;padding:2px 8px;font-size:9px;letter-spacing:.12em;border:1px solid currentColor}
+.pill.w{color:var(--steel)}
+.pill.l{color:var(--good)}
+.pill.g{color:var(--mute-2)}
+/* 日志 + 操作 */
+.duo2{display:grid;grid-template-columns:7fr 5fr;gap:14px}
+.term{
+  background:var(--shell);color:#C7CBC7;font-family:var(--mono);font-size:11px;line-height:1.75;
+  padding:16px 18px;position:relative;overflow:hidden;
+}
+.term::before{content:"LOG // SYSLOG — LIVE TAIL";position:absolute;top:0;left:0;right:0;
+  font-size:8px;letter-spacing:.26em;color:#26292E;background:var(--orange);padding:3px 10px}
+.term{padding-top:30px;max-height:240px;overflow-y:auto}
+.term::-webkit-scrollbar{width:8px}
+.term::-webkit-scrollbar-thumb{background:var(--shell-3)}
+.term .t{color:var(--mute-2)}
+.term .hl{color:var(--orange-soft)}
+.term .ok{color:#7FB98A}
+.term.cursor-line::after{content:"▌";color:var(--orange);animation:blink 1s infinite}
+.ops{display:flex;flex-direction:column;gap:10px}
+.op-btn{
+  display:flex;align-items:center;justify-content:space-between;
+  border:1px solid var(--ink);background:var(--paper-2);padding:13px 16px;
+  font-family:var(--disp);font-size:13px;font-weight:700;cursor:pointer;
+  transition:all .15s;letter-spacing:.06em;
+}
+.op-btn .kbd{font-family:var(--mono);font-size:9px;color:var(--mute);letter-spacing:.14em}
+.op-btn:hover{background:var(--ink);color:var(--paper);transform:translate(-2px,-2px);box-shadow:3px 3px 0 var(--orange)}
+.op-btn.danger:hover{background:var(--orange);color:#26292E;box-shadow:3px 3px 0 var(--shell)}
+.op-btn:hover .kbd{color:var(--orange-soft)}
+/* 页脚 */
+.footer{
+  margin-top:40px;padding-top:14px;border-top:1px solid var(--line);
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:var(--mono);font-size:9px;letter-spacing:.18em;color:var(--mute);
+}
+.footer .compat{display:flex;gap:8px}
+.footer .compat span{border:1px solid var(--line);padding:2px 8px;background:var(--paper-2)}
+/* 进场动画 */
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.rise{animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
+.d1{animation-delay:.05s}.d2{animation-delay:.12s}.d3{animation-delay:.2s}.d4{animation-delay:.28s}
+.d5{animation-delay:.36s}.d6{animation-delay:.44s}.d7{animation-delay:.52s}
+@media(max-width:1080px){
+  .cards{grid-template-columns:repeat(2,1fr)}
+  .duo,.duo2{grid-template-columns:1fr}
+  .hero{flex-direction:column;align-items:flex-start}
+  .app{grid-template-columns:64px 1fr}
+  .brand{width:64px}.brand-name,.brand-sub{display:none}
+  .nav-item span,.nav-item .arrow,.nav-group-label,.plate,.crumb{display:none}
+  .nav-item{justify-content:center;padding:14px 0}
+  .nav-item .idx{width:auto;font-size:10px}
+}
+</style>
+</head>
+<body class="grain">
+<div class="app">
+
+  <!-- ═══ 顶栏 ═══ -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div>
+        <div class="brand-name">ROUTECRAFT</div>
+        <div class="brand-sub">LUCI CONSOLE · REV A</div>
+      </div>
+    </div>
+    <nav class="crumb"><b>状态</b><span class="sep">//</span><span>总览 OVERVIEW</span></nav>
+    <div class="top-right">
+      <div class="chip"><label>HOST</label><span>openwrt-core</span></div>
+      <div class="chip"><label>FIRMWARE</label><span>OpenWrt 24.10.2</span></div>
+      <div class="chip"><label>UPTIME</label><span id="uptime" class="accent">16d 04:22:31</span></div>
+      <div class="chip"><label>LOCAL TIME</label><span id="clock">--:--:--</span></div>
+      <button class="mode-btn" id="themeToggle">MODE · DARK</button>
+      <div class="power" title="注销">
+        <svg viewBox="0 0 24 24"><path d="M12 3v9M6.3 6.3a8 8 0 1 0 11.4 0"/></svg>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══ 侧边栏 ═══ -->
+  <aside class="sidebar">
+    <nav class="nav" id="nav">
+      <div class="nav-group-label">MONITOR</div>
+      <div class="nav-item active"><span class="idx">01</span><span>状态</span><span class="arrow">▸</span></div>
+      <div class="nav-group-label">CONFIGURE</div>
+      <div class="nav-item"><span class="idx">02</span><span>系统</span><span class="arrow">▸</span></div>
+      <div class="nav-item"><span class="idx">03</span><span>服务</span><span class="arrow">▸</span></div>
+      <div class="nav-item has-sub open" data-sub><span class="idx">04</span><span>网络</span><span class="arrow">▸</span></div>
+      <div class="nav-sub open">
+        <div class="nav-item">接口</div>
+        <div class="nav-item">无线</div>
+        <div class="nav-item">DHCP / DNS</div>
+        <div class="nav-item">防火墙</div>
+        <div class="nav-item">路由</div>
+      </div>
+      <div class="nav-item"><span class="idx">05</span><span>存储</span><span class="arrow">▸</span></div>
+      <div class="nav-group-label">SESSION</div>
+      <div class="nav-item"><span class="idx">06</span><span>注销</span><span class="arrow">▸</span></div>
+    </nav>
+    <div class="plate">
+      <div class="plate-title">UNIT PLATE</div>
+      <div class="plate-row"><span>MODEL</span><b>x86/64 Generic</b></div>
+      <div class="plate-row"><span>ARCH</span><b>x86_64</b></div>
+      <div class="plate-row"><span>KERNEL</span><b>6.6.104</b></div>
+      <div class="plate-row"><span>TEMP</span><b class="accent" id="plateTemp">47.2°C</b></div>
+      <div class="barcode"></div>
+    </div>
+  </aside>
+
+  <!-- ═══ 主内容 ═══ -->
+  <main class="main grid-bg">
+    <div class="content">
+
+      <!-- HERO -->
+      <section class="hero rise d1">
+        <div>
+          <div class="hero-eyebrow"><span class="dot-live"></span>SYSTEM STATUS — LIVE</div>
+          <h1>All Systems<br><em>Nominal.</em></h1>
+          <div class="hero-sub">负载 <b id="heroLoad">0.42</b> · 内存可用 <b id="heroMem">312 MB</b> · 在线设备 <b>14</b> 台 · 最后告警 <b>无</b></div>
+        </div>
+        <div class="rate-box">
+          <div class="rate-cell rx">
+            <label>▼ DOWNLOAD · br-lan</label>
+            <span class="val" id="rxVal">86.4</span><span class="unit">Mbps</span>
+          </div>
+          <div class="rate-cell tx">
+            <label>▲ UPLOAD · pppoe-wan</label>
+            <span class="val" id="txVal">12.7</span><span class="unit">Mbps</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 01 核心指标 -->
+      <div class="sec-head rise d2"><span class="no">SEC.01</span><h2>核心指标 Vitals</h2><span class="note">采样间隔 2.0s · 数据源 /proc</span></div>
+      <section class="cards">
+        <div class="card rise d2"><i class="corner"></i>
+          <div class="card-label"><h3>CPU 占用</h3><span class="tag">4C/4T</span></div>
+          <div class="gauge-wrap">
+            <svg class="gauge" viewBox="0 0 80 80">
+              <line class="tick" x1="40" y1="4" x2="40" y2="10"/>
+              <line class="tick" x1="76" y1="40" x2="70" y2="40"/>
+              <line class="tick" x1="4" y1="40" x2="10" y2="40"/>
+              <circle class="track" cx="40" cy="40" r="30"/>
+              <circle class="fill" id="cpuArc" cx="40" cy="40" r="30"
+                stroke-dasharray="188.5" stroke-dashoffset="120" transform="rotate(-90 40 40)"/>
+            </svg>
+            <div>
+              <div class="gauge-num"><span id="cpuNum">36</span><small> %</small></div>
+              <div class="stat-lines">
+                <div class="stat-line"><span>user</span><b id="cpuU">21.4%</b></div>
+                <div class="stat-line"><span>system</span><b id="cpuS">9.8%</b></div>
+                <div class="stat-line"><span>sirq</span><b id="cpuQ">4.9%</b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card rise d3"><i class="corner"></i>
+          <div class="card-label"><h3>内存 Memory</h3><span class="tag">1.0 GB</span></div>
+          <div class="big-mono"><span id="memPct">68</span><small> % USED</small></div>
+          <div class="meter"><div class="fillbar" id="memBar" style="width:68%"></div><div class="th" style="left:85%"></div></div>
+          <div class="stat-line"><span>available</span><b id="memAvail">312 MB</b></div>
+          <div class="stat-line"><span>buffered</span><b>96 MB</b></div>
+        </div>
+
+        <div class="card rise d4"><i class="corner"></i>
+          <div class="card-label"><h3>负载 Loadavg</h3><span class="tag">/proc/loadavg</span></div>
+          <div class="big-mono" id="loadBig">0.42</div>
+          <div class="load-cells">
+            <div class="load-cell"><label>1 MIN</label><span id="load1">0.42</span></div>
+            <div class="load-cell"><label>5 MIN</label><span id="load5">0.38</span></div>
+            <div class="load-cell"><label>15 MIN</label><span id="load15">0.31</span></div>
+          </div>
+        </div>
+
+        <div class="card rise d5"><i class="corner"></i>
+          <div class="card-label"><h3>温度 Thermal</h3><span class="tag">zone0</span></div>
+          <div class="big-mono"><span id="tempNum">47.2</span><small> °C</small></div>
+          <canvas class="spark" id="tempSpark"></canvas>
+          <div class="stat-line"><span>阈值 throttle</span><b>85.0°C</b></div>
+        </div>
+      </section>
+
+      <!-- 02 实时流量 -->
+      <div class="sec-head rise d3"><span class="no">SEC.02</span><h2>实时流量 Throughput</h2><span class="note">接口 br-lan · pppoe-wan · 窗口 120s</span></div>
+      <section class="chart-card rise d3">
+        <div class="chart-head">
+          <h3>THROUGHPUT MONITOR</h3>
+          <div class="legend">
+            <span class="rx"><i></i>RX 下行</span>
+            <span class="tx"><i></i>TX 上行</span>
+          </div>
+        </div>
+        <div class="chart-body">
+          <canvas id="traffic"></canvas>
+          <div class="ruler-x"></div>
+        </div>
+      </section>
+
+      <!-- 03 接口 & 设备 -->
+      <div class="sec-head rise d4"><span class="no">SEC.03</span><h2>接口与设备 Interfaces / Clients</h2><span class="note">ARP + iwinfo 聚合</span></div>
+      <section class="duo">
+        <div class="iface rise d4">
+          <div class="iface-row">
+            <div class="iface-ic on">WAN</div>
+            <div><h4>pppoe-wan</h4><div class="sub">100.64.23.118 · 已连接 16d</div></div>
+            <span class="pill l">UP</span>
+          </div>
+          <div class="iface-row">
+            <div class="iface-ic on">LAN</div>
+            <div><h4>br-lan</h4><div class="sub">192.168.2.1/24 · 4 ports</div></div>
+            <span class="pill l">UP</span>
+          </div>
+          <div class="iface-row">
+            <div class="iface-ic on">5G</div>
+            <div><h4>phy1-ap0 · RouteCraft_5G</h4><div class="sub">ch149 · 80MHz · WPA3</div></div>
+            <div class="sig"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div>
+          </div>
+          <div class="iface-row">
+            <div class="iface-ic">2.4G</div>
+            <div><h4>phy0-ap0 · RouteCraft_IoT</h4><div class="sub">ch6 · 20MHz · WPA2</div></div>
+            <div class="sig"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div>
+          </div>
+          <div class="iface-row">
+            <div class="iface-ic">WG</div>
+            <div><h4>wg0 · WireGuard</h4><div class="sub">10.8.0.1/24 · 2 peers</div></div>
+            <span class="pill w">VPN</span>
+          </div>
+        </div>
+
+        <div class="card rise d5" style="padding:0;overflow:hidden">
+          <table>
+            <thead>
+              <tr><th>主机名</th><th>IP 地址</th><th>MAC</th><th>接口</th><th>速率</th><th>信号</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>macbook-pro</td><td>192.168.2.101</td><td>A4:83:E7:2C:91:0F</td><td><span class="pill w">5G</span></td><td>866 Mbps</td><td>-52 dBm</td></tr>
+              <tr><td>nas-synology</td><td>192.168.2.10</td><td>00:11:32:8A:4D:E2</td><td><span class="pill l">LAN</span></td><td>1 Gbps</td><td>—</td></tr>
+              <tr><td>iphone-15</td><td>192.168.2.114</td><td>7E:9A:11:F0:3B:C8</td><td><span class="pill w">5G</span></td><td>433 Mbps</td><td>-61 dBm</td></tr>
+              <tr><td>mi-tv-box</td><td>192.168.2.120</td><td>48:B0:2D:77:0E:A1</td><td><span class="pill g">2.4G</span></td><td>72 Mbps</td><td>-70 dBm</td></tr>
+              <tr><td>esp32-sensor</td><td>192.168.2.131</td><td>24:6F:28:B1:55:7C</td><td><span class="pill g">2.4G</span></td><td>54 Mbps</td><td>-74 dBm</td></tr>
+              <tr><td>desktop-rgb</td><td>192.168.2.102</td><td>D8:BB:C1:0A:9E:33</td><td><span class="pill l">LAN</span></td><td>2.5 Gbps</td><td>—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 04 日志与操作 -->
+      <div class="sec-head rise d5"><span class="no">SEC.04</span><h2>日志与操作 Logs / Ops</h2><span class="note">logread -f</span></div>
+      <section class="duo2">
+        <div class="term rise d5" id="term">
+          <div><span class="t">Nov 10 14:22:01</span> kernel: <span class="ok">br-lan: port 3(eth2) entered forwarding state</span></div>
+          <div><span class="t">Nov 10 14:22:04</span> dnsmasq[1832]: DHCPACK(br-lan) 192.168.2.114 7e:9a:11:f0:3b:c8 <span class="hl">iphone-15</span></div>
+          <div><span class="t">Nov 10 14:22:11</span> hostapd: phy1-ap0: AP-STA-CONNECTED a4:83:e7:2c:91:0f</div>
+          <div><span class="t">Nov 10 14:22:18</span> firewall: redirect 192.168.2.101:52314 → 443 <span class="hl">[rule: game-boost]</span></div>
+          <div><span class="t">Nov 10 14:22:25</span> netifd: Interface 'wg0' handshake <span class="ok">peer 10.8.0.2 ok</span></div>
+          <div><span class="t">Nov 10 14:22:33</span> system: ntpd sync offset <span class="hl">+0.003s</span></div>
+          <div class="cursor-line"><span class="t">Nov 10 14:22:40</span> dispatcher: </div>
+        </div>
+        <div class="ops rise d6">
+          <button class="op-btn">重启路由<span class="kbd">SYS → REBOOT</span></button>
+          <button class="op-btn">备份配置归档<span class="kbd">SYS → BACKUP .TAR.GZ</span></button>
+          <button class="op-btn">固件在线升级<span class="kbd">SYS → FLASH IMAGE</span></button>
+          <button class="op-btn danger">清空 DHCP 租约<span class="kbd">NET → FLUSH LEASES</span></button>
+        </div>
+      </section>
+
+      <footer class="footer rise d7">
+        <span>ROUTECRAFT THEME · PREVIEW BUILD 0.1.0 · DESIGN PROPOSAL</span>
+        <div class="compat">
+          <span>OpenWrt 22.03</span><span>23.05</span><span>24.10</span><span>ImmortalWrt</span><span>iStoreOS</span>
+        </div>
+      </footer>
+
+    </div>
+  </main>
+</div>
+
+<script>
+/* ───────── 模拟数据引擎（预览用） ───────── */
+const $ = id => document.getElementById(id);
+const rand = (a,b)=>a+Math.random()*(b-a);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const cssVar = n => getComputedStyle(document.body).getPropertyValue(n).trim();
+const rgba = (hex,a)=>{
+  let h=hex.replace('#','');
+  if(h.length===3)h=h.split('').map(c=>c+c).join('');
+  const n=parseInt(h,16);
+  return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`;
+};
+
+/* 深浅模式切换 */
+$('themeToggle').addEventListener('click',()=>{
+  const dark=document.body.classList.toggle('dark');
+  $('themeToggle').textContent=dark?'MODE · LIGHT':'MODE · DARK';
+});
+
+/* 时钟 & 运行时间 */
+let upSec = 16*86400 + 4*3600 + 22*60 + 31;
+setInterval(()=>{
+  const d=new Date();
+  $('clock').textContent=[d.getHours(),d.getMinutes(),d.getSeconds()].map(n=>String(n).padStart(2,'0')).join(':');
+  upSec++;
+  const dd=Math.floor(upSec/86400),h=Math.floor(upSec%86400/3600),m=Math.floor(upSec%3600/60),s=upSec%60;
+  $('uptime').textContent=`${dd}d ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+},1000);
+
+/* 指标随机游走 */
+let cpu=36, mem=68, load=0.42, temp=47.2, rx=86.4, tx=12.7;
+const tempHist=Array.from({length:60},()=>47+rand(-1.5,1.5));
+function tick(){
+  cpu=clamp(cpu+rand(-6,6),8,92);
+  mem=clamp(mem+rand(-1.2,1.2),55,82);
+  load=clamp(load+rand(-.06,.06),.1,1.8);
+  temp=clamp(temp+rand(-.4,.4),44,58);
+  rx=clamp(rx+rand(-14,14),20,240);
+  tx=clamp(tx+rand(-3,3),2,60);
+  tempHist.push(temp);tempHist.shift();
+
+  $('cpuNum').textContent=Math.round(cpu);
+  $('cpuArc').style.strokeDashoffset=(188.5*(1-cpu/100)).toFixed(1);
+  $('cpuU').textContent=(cpu*.58).toFixed(1)+'%';
+  $('cpuS').textContent=(cpu*.27).toFixed(1)+'%';
+  $('cpuQ').textContent=(cpu*.13).toFixed(1)+'%';
+  $('memPct').textContent=Math.round(mem);
+  $('memBar').style.width=mem+'%';
+  const avail=Math.round(1024*(1-mem/100));
+  $('memAvail').textContent=avail+' MB';
+  $('heroMem').textContent=avail+' MB';
+  $('loadBig').textContent=load.toFixed(2);
+  $('load1').textContent=load.toFixed(2);
+  $('load5').textContent=(load*.9).toFixed(2);
+  $('load15').textContent=(load*.74).toFixed(2);
+  $('heroLoad').textContent=load.toFixed(2);
+  $('tempNum').textContent=temp.toFixed(1);
+  $('plateTemp').textContent=temp.toFixed(1)+'°C';
+  $('rxVal').textContent=rx.toFixed(1);
+  $('txVal').textContent=tx.toFixed(1);
+  drawTempSpark();
+}
+setInterval(tick,2000);tick();
+
+/* 温度 sparkline */
+function drawTempSpark(){
+  const c=$('tempSpark'),ctx=c.getContext('2d'),dpr=devicePixelRatio||1;
+  const w=c.clientWidth,h=c.clientHeight;
+  c.width=w*dpr;c.height=h*dpr;ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,w,h);
+  const min=Math.min(...tempHist)-1,max=Math.max(...tempHist)+1;
+  ctx.beginPath();
+  tempHist.forEach((v,i)=>{
+    const x=i/(tempHist.length-1)*w,y=h-(v-min)/(max-min)*(h-4)-2;
+    i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+  });
+  ctx.strokeStyle=cssVar('--orange');ctx.lineWidth=1.5;ctx.stroke();
+  /* 末点标记 */
+  const lx=w,ly=h-(tempHist.at(-1)-min)/(max-min)*(h-4)-2;
+  ctx.fillStyle=cssVar('--ink');ctx.fillRect(lx-3,ly-3,6,6);
+}
+
+/* 流量主图 */
+const RX=Array.from({length:120},()=>rand(30,110));
+const TX=Array.from({length:120},()=>rand(4,25));
+setInterval(()=>{RX.push(rx+rand(-8,8));RX.shift();TX.push(tx+rand(-2,2));TX.shift();},1000);
+function drawTraffic(){
+  const c=$('traffic'),ctx=c.getContext('2d'),dpr=devicePixelRatio||1;
+  const w=c.clientWidth,h=c.clientHeight;
+  if(c.width!==w*dpr){c.width=w*dpr;c.height=h*dpr;}
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,w,h);
+  const max=260,pad=14,ph=h-pad*2;
+  /* 网格 */
+  ctx.strokeStyle=cssVar('--line');ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y=pad+ph/4*i;
+    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();
+    ctx.fillStyle=cssVar('--mute');ctx.font='9px "IBM Plex Mono"';
+    ctx.fillText(Math.round(max*(1-i/4))+'',6,y-3);
+  }
+  const plot=(data,color,fill)=>{
+    ctx.beginPath();
+    data.forEach((v,i)=>{
+      const x=i/(data.length-1)*w,y=pad+ph*(1-clamp(v,0,max)/max);
+      i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+    });
+    ctx.strokeStyle=color;ctx.lineWidth=1.6;ctx.stroke();
+    if(fill){
+      ctx.lineTo(w,pad+ph);ctx.lineTo(0,pad+ph);ctx.closePath();
+      ctx.fillStyle=fill;ctx.fill();
+    }
+  };
+  plot(TX,cssVar('--steel'));
+  plot(RX,cssVar('--orange'),rgba(cssVar('--orange'),.08));
+  /* 游标线 */
+  ctx.setLineDash([3,4]);ctx.strokeStyle=cssVar('--mute');
+  ctx.beginPath();ctx.moveTo(w-1,pad);ctx.lineTo(w-1,pad+ph);ctx.stroke();ctx.setLineDash([]);
+}
+(function loop(){drawTraffic();requestAnimationFrame(loop);})();
+
+/* 侧边栏手风琴 */
+document.querySelectorAll('[data-sub]').forEach(el=>{
+  el.addEventListener('click',()=>{
+    el.classList.toggle('open');
+    el.nextElementSibling.classList.toggle('open');
+  });
+});
+document.querySelectorAll('.nav > .nav-item:not([data-sub]), .nav-sub .nav-item').forEach(el=>{
+  el.addEventListener('click',()=>{
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    el.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

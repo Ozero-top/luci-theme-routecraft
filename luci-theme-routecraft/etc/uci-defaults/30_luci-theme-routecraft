@@ -1,0 +1,7 @@
+#!/bin/sh
+uci -q batch <<EOF
+set luci.themes.RouteCraft=/luci-static/routecraft
+set luci.main.mediaurlbase=/luci-static/routecraft
+commit luci
+EOF
+exit 0

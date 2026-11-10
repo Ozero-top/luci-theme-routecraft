@@ -1,0 +1,22 @@
+{% if (!blank_page): %}
+			</div><!-- /#maincontent -->
+		</div><!-- /.rc-shell -->
+
+		<footer class="rc-footer">
+			<span class="rc-footer-power">
+				Powered by
+				<a href="https://github.com/openwrt/luci" target="_blank" rel="noreferrer">
+					{{ version.luciname }} ({{ version.luciversion }})</a>
+				/
+				<a href="{{ entityencode(version.disturl ?? '#', true) }}" target="_blank" rel="noreferrer">
+					{{ version.distname }} {{ version.distversion }}</a>
+			</span>
+			<span class="rc-footer-tag">ROUTECRAFT · ISTOREOS EDITION</span>
+		</footer>
+		<script src="{{ media }}/theme.js?v=RCVERSION"></script>
+		<script>L.require('menu-routecraft', undefined, 'RCVERSION')</script>
+		{% else %}
+		<script src="{{ media }}/theme.js?v=RCVERSION"></script>
+		{% endif %}
+	</body>
+</html>

@@ -1,0 +1,93 @@
+{#
+	RouteCraft — industrial console theme for iStoreOS
+	Light / Dark dual mode, single package.
+-#}
+
+{%
+	import { getuid, getspnam } from 'luci.core';
+
+	const boardinfo = ubus.call('system', 'board');
+
+	http.prepare_content('text/html; charset=UTF-8');
+-%}
+
+<!DOCTYPE html>
+<html lang="{{ dispatcher.lang }}">
+	<head>
+		<meta charset="utf-8">
+		<title>{{ striptags(`${boardinfo.hostname ?? '?'}${node ? ` - ${node.title}` : ''}`) }} - LuCI</title>
+		<script>
+			(function () {
+				var dark = null;
+				try { dark = localStorage.getItem('rc-dark'); } catch (e) {}
+				if (dark === null)
+					dark = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'true' : 'false';
+				document.documentElement.setAttribute('data-darkmode', dark);
+				window.__rcDark = (dark === 'true');
+			})();
+		</script>
+		<meta name="viewport" content="initial-scale=1.0">
+		<link rel="stylesheet" href="{{ media }}/cascade.css?v=RCVERSION">
+		<link rel="icon" href="{{ media }}/favicon.svg" sizes="any">
+		{% if (node?.css): %}
+		<link rel="stylesheet" href="{{ resource }}/{{ node.css }}">
+		{% endif %}
+		{% if (css): %}
+		<style title="text/css">{{ css }}</style>
+		{% endif %}
+		<script src="{{ dispatcher.build_url('admin/translations', dispatcher.lang) }}"></script>
+		<script src="{{ resource }}/cbi.js"></script>
+	</head>
+
+	<body class="lang_{{ dispatcher.lang }} rc {{ entityencode(striptags(node?.title ?? ''), true) }}" data-page="{{ entityencode(join('-', ctx.request_path), true) }}">
+		<script>document.body.setAttribute('theme', window.__rcDark ? 'dark' : 'light');</script>
+		{% if (!blank_page): %}
+		<header class="rc-topbar">
+			<button class="rc-burger" id="rc-burger" type="button" aria-label="menu"><i></i><i></i><i></i></button>
+			<a class="rc-brand" href="/">
+				<span class="rc-brand-mark"></span>
+				<span class="rc-brand-text">{{ striptags(boardinfo.hostname ?? '?') }}</span>
+				<span class="rc-brand-sub">LUCI CONSOLE</span>
+			</a>
+			<div class="rc-topright">
+				<div id="indicators" class="rc-indicators"></div>
+				<button class="rc-mode-btn" id="rc-mode" type="button">MODE</button>
+			</div>
+		</header>
+
+		<div class="rc-shell">
+			<aside class="rc-sidebar" id="rc-sidebar">
+				<nav class="rc-nav" id="rc-menu" style="display:none"></nav>
+			</aside>
+			<div class="rc-nav-mask" id="rc-nav-mask"></div>
+
+			<div id="maincontent" class="rc-main">
+				{% if (getuid() == 0 && getspnam('root')?.pwdp === ''): %}
+					<div class="alert-message warning">
+						<h4>{{ _('No password set!') }}</h4>
+						<p>{{ _('There is no password set on this router. Please configure a root password to protect the web interface.') }}</p>
+						{% if (dispatcher.lookup("admin/system/admin")): %}
+						  <div class="right"><a class="btn cbi-button" href="{{ dispatcher.build_url("admin/system/admin") }}">{{ _('Go to password configuration...') }}</a></div>
+						{% endif %}
+					</div>
+				{% endif %}
+
+				{% if (boardinfo.rootfs_type == "initramfs"): %}
+					<div class="alert-message warning">
+						<h4>{{ _('System running in recovery (initramfs) mode.') }}</h4>
+						<p>{{ _('No changes to settings will be stored and are lost after rebooting. This mode should only be used to install a firmware upgrade') }}</p>
+						{% if (dispatcher.lookup("admin/system/flash")): %}
+						  <div class="right"><a class="btn cbi-button" href="{{ dispatcher.build_url("admin/system/flash") }}">{{ _('Go to firmware upgrade...') }}</a></div>
+						{% endif %}
+					</div>
+				{% endif %}
+
+				<noscript>
+					<div class="alert-message warning">
+						<h4>{{ _('JavaScript required!') }}</h4>
+						<p>{{ _('You must enable JavaScript in your browser or LuCI will not work properly.') }}</p>
+					</div>
+				</noscript>
+
+				<div id="tabmenu" style="display:none"></div>
+		{% endif %}
