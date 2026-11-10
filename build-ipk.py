@@ -1,11 +1,25 @@
 # -*- coding: utf-8 -*-
-"""Build luci-theme-routecraft ipk (tar.gz outer, ustar inner).
+"""Build luci-theme-routecraft packages.
 
-Usage: python build-ipk.py          # 同时产 24.10 / 25.12 两个包
-       python build-ipk.py 25       # 只产指定版本
+Usage: python build-ipk.py
 
-两个版本的源码完全相同，postinst 在安装时自动检测 wizard.htm 是否存在
-（24.10 自带，25.12 没有就从原版 main.htm 复制创建）。
+两个格式：
+  - OpenWrt / iStoreOS 24.10 (.ipk)  —— debian-binary + control.tar.gz + data.tar.gz
+    安装：opkg install luci-theme-routecraft_1.0.0-27_2410_all.ipk
+
+  - Alpine / iStoreOS 25.12 (.ipk)   —— 和 24.10 结构相同的 ipk
+    25.12 底层换成了 Alpine apk-tools，但 Alpine apk 的 v2 格式
+    （双 gzip 流拼接 + abuild-tar --cut + APK-TOOLS.checksum.SHA1 PAX 头）
+    Python 标准库无法生成。故我们产标准 ipk，通过下面任一方式安装：
+
+    方式 1（推荐）：手动解压
+      tar xzf luci-theme-routecraft_1.0.0-27_2512_all.ipk
+      tar xzf data.tar.gz -C /
+      tar xzf control.tar.gz
+      sh postinst            # 自动备份原版 + 切 UCI + 创建 wizard.htm（25.12 没有）
+
+    方式 2：如果系统自带 is-opkg（桥接器）
+      is-opkg install luci-theme-routecraft_1.0.0-27_2512_all.ipk
 """
 import io
 import os
@@ -17,104 +31,87 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(ROOT, "luci-theme-routecraft")
 DIST = os.path.join(ROOT, "dist")
 VERSION = "1.0.0"
-RELEASE_BASE = "26"           # Release 号（每次迭代递增）
+RELEASE = "27"
 STAMP = time.strftime("%Y%m%d%H%M")
+PKGNAME = "luci-theme-routecraft"
 
-EXEC_FILES = {"CONTROL/postinst", "CONTROL/prerm", "CONTROL/postrm", "CONTROL/preinst"}
-# 两个目标：24.10 和 25.12
-TARGETS = [
-    ("24.10", "rc24"),
-    ("25.12", "rc25"),
-]
+EXEC_FILES = {
+    "CONTROL/postinst", "CONTROL/prerm", "CONTROL/postrm", "CONTROL/preinst",
+}
 
 
-def read_normalized(path):
+def read_norm(path):
     with open(path, "rb") as f:
-        data = f.read()
-    return data.replace(b"\r\n", b"\n")
+        return f.read().replace(b"\r\n", b"\n")
 
 
-def inject(data, installed_size, release_tag):
-    return (data.replace(b"RCVERSION", STAMP.encode())
-                .replace(b"RCSIZE", str(installed_size).encode())
-                .replace(b"RCVER", ("%s-%s" % (VERSION, RELEASE_BASE)).encode())
-                .replace(b"RCTARGET", release_tag.encode()))
-
-
-def add_bytes(tar, arcname, data, mode, is_dir=False):
+def add_file(tar, arcname, data, mode):
     info = tarfile.TarInfo(arcname)
-    info.size = 0 if is_dir else len(data)
+    info.size = len(data)
     info.mode = mode
     info.uid = info.gid = 0
     info.uname = info.gname = "root"
     info.mtime = int(time.time())
-    if is_dir:
-        info.type = tarfile.DIRTYPE
     tar.addfile(info, io.BytesIO(data))
 
 
-def build_one(ver_label, release_tag):
-    os.makedirs(DIST, exist_ok=True)
-
-    data_files = []
-    control_files = []
+def collect_files():
+    ctrl, data = [], []
     for base, _dirs, files in os.walk(SRC):
         for name in files:
             full = os.path.join(base, name)
             rel = os.path.relpath(full, SRC).replace(os.sep, "/")
-            if rel.startswith("CONTROL/"):
-                control_files.append((rel, full))
-            else:
-                data_files.append((rel, full))
+            (ctrl if rel.startswith("CONTROL/") else data).append((rel, full))
+    ctrl.sort()
+    data.sort()
+    return ctrl, data
 
-    data_files.sort()
-    control_files.sort()
+
+def build_ipk(data_files, control_files, suffix):
+    """OpenWrt 标准 ipk：debian-binary + control.tar.gz + data.tar.gz"""
+    os.makedirs(DIST, exist_ok=True)
     installed_size = sum(os.path.getsize(p) for _, p in data_files) // 1024
 
-    # data.tar.gz (ustar)
     data_buf = io.BytesIO()
     with tarfile.open(fileobj=data_buf, mode="w:gz", format=tarfile.USTAR_FORMAT) as tar:
-        dirs = set()
-        for rel, _ in data_files:
-            parts = rel.split("/")[:-1]
-            for i in range(1, len(parts) + 1):
-                dirs.add("/".join(parts[:i]))
-        for d in sorted(dirs):
-            add_bytes(tar, "./" + d + "/", b"", 0o755, is_dir=True)
         for rel, full in data_files:
-            raw = inject(read_normalized(full), installed_size, release_tag)
+            raw = read_norm(full)
             mode = 0o755 if rel in EXEC_FILES else 0o644
-            add_bytes(tar, "./" + rel, raw, mode)
+            add_file(tar, "./" + rel, raw, mode)
 
-    # control.tar.gz (ustar)
     ctrl_buf = io.BytesIO()
     with tarfile.open(fileobj=ctrl_buf, mode="w:gz", format=tarfile.USTAR_FORMAT) as tar:
         for rel, full in control_files:
             arc = rel.split("/", 1)[1]
-            raw = inject(read_normalized(full), installed_size, release_tag)
+            raw = read_norm(full)
             mode = 0o755 if arc in {"postinst", "prerm", "postrm", "preinst"} else 0o644
-            add_bytes(tar, "./" + arc, raw, mode)
+            add_file(tar, "./" + arc, raw, mode)
 
-    ipk_name = "luci-theme-routecraft_%s-%s_%s_all.ipk" % (VERSION, RELEASE_BASE, ver_label.replace(".", ""))
-    ipk_path = os.path.join(DIST, ipk_name)
-    with tarfile.open(ipk_path, "w:gz", format=tarfile.USTAR_FORMAT) as tar:
-        add_bytes(tar, "./debian-binary", b"2.0\n", 0o644)
-        add_bytes(tar, "./control.tar.gz", ctrl_buf.getvalue(), 0o644)
-        add_bytes(tar, "./data.tar.gz", data_buf.getvalue(), 0o644)
-
-    print("built:", ipk_path, "(%s, %s)" % (ver_label, release_tag))
-    return ipk_path
+    name = "%s_%s-%s_%s_all.ipk" % (PKGNAME, VERSION, RELEASE, suffix)
+    path = os.path.join(DIST, name)
+    with tarfile.open(path, "w:gz", format=tarfile.USTAR_FORMAT) as tar:
+        add_file(tar, "./debian-binary", b"2.0\n", 0o644)
+        add_file(tar, "./control.tar.gz", ctrl_buf.getvalue(), 0o644)
+        add_file(tar, "./data.tar.gz", data_buf.getvalue(), 0o644)
+    print("  ipk:", name)
+    return path
 
 
 def main():
-    only = sys.argv[1] if len(sys.argv) > 1 else None
+    ctrl, data = collect_files()
     built = []
-    for ver_label, release_tag in TARGETS:
-        if only and release_tag != only:
-            continue
-        built.append(build_one(ver_label, release_tag))
-    print("----")
-    print("done:", len(built), "package(s) in dist/")
+
+    # 两个 ipk，内容完全相同，文件名区分目标固件
+    built.append(build_ipk(data, ctrl, "2410"))
+    built.append(build_ipk(data, ctrl, "2512"))
+
+    print("\ndone:", len(built), "package(s) in dist/")
+    print("\n安装提示:")
+    print("  iStoreOS 24.10: opkg install luci-theme-routecraft_%s-%s_2410_all.ipk" % (VERSION, RELEASE))
+    print("  iStoreOS 25.12: 手动解压（apk-tools 不支持标准 ipk，也没有 abuild-tar）")
+    print("    tar xzf luci-theme-routecraft_%s-%s_2512_all.ipk" % (VERSION, RELEASE))
+    print("    tar xzf data.tar.gz -C /")
+    print("    tar xzf control.tar.gz && sh postinst")
 
 
 if __name__ == "__main__":
