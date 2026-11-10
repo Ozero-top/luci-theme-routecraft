@@ -4,7 +4,7 @@ iStoreOS 的 LuCI 主题。一个源，两种模式（暖纸面浅色 / 暖炭�
 
 适配 iStoreOS 24.10 与 25.12（apk 版），同一份源码，由 `install.sh` 自动识别版本后写入。别的固件不打算适配。
 
-## 装
+## 安装脚本
 
 不用装包，跑脚本就行。脚本会自动识别 iStoreOS 版本（24.10 / 25.12）并写入对应的文件：
 
@@ -26,6 +26,10 @@ wget -qO- https://raw.githubusercontent.com/Ozero-top/luci-theme-routecraft/main
 国内 raw 地址慢的话套加速镜像：
 
 ```bash
+# jsDelivr（国内一般最快）
+curl -fsSL https://cdn.jsdelivr.net/gh/Ozero-top/luci-theme-routecraft@main/install.sh | sh
+
+# gh-proxy
 curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Ozero-top/luci-theme-routecraft/main/install.sh | sh
 ```
 
@@ -37,7 +41,7 @@ ROUTECRAFT_MIRROR=https://your.proxy/ sh install.sh
 
 装完自动启用，刷新浏览器就是。首页要重新登录一次才能取到实时数据（脚本会重载 ACL）。
 
-## 卸
+## 卸载脚本
 
 ```bash
 ./install.sh uninstall
