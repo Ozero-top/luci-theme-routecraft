@@ -852,27 +852,212 @@ body.modal-overlay-active #modal_overlay { opacity:1; visibility:visible; }
 .app-container { border:1px solid var(--rc-line) !important; border-radius:0 !important; }
 
 /* ---------- 11b. quickstart 向导页（网络向导/无线向导等） ---------- */
-/* 欢迎页三张彩色大卡 → 主题深色仪器卡 */
-#app #main .network-container_item .thumbnail {
-	background:var(--rc-shell) !important;
-	border:1px solid var(--rc-ink);
-	border-radius:0 !important;
-	box-shadow:none;
-	transition:transform .18s ease, box-shadow .18s ease;
+/* 向导页容器：原样式写死 100vh，嵌在 .rc-main 里会多出一屏滚动 */
+#app #main #page {
+	height:auto !important;
+	min-height:calc(100vh - 200px) !important;
+	max-width:1040px !important;
+	padding:32px 0 32px !important;
+	overflow:visible !important;
+	justify-content:center !important;
+	align-content:center !important;
 }
-#app #main .network-container_item:hover .thumbnail {
-	transform:translate(-2px,-2px);
-	box-shadow:4px 4px 0 var(--rc-orange);
+/* 欢迎页：报头小字，仅在有三选一卡片时出现 */
+#app #main #page:has(.network-containers)::before {
+	content:"ROUTECRAFT / NETWORK SETUP";
+	display:block; width:100%; text-align:center;
+	font-family:var(--rc-mono); font-size:9px; font-weight:600;
+	letter-spacing:.34em; color:var(--rc-mute);
+	margin-bottom:18px;
 }
-/* 欢迎页标题/副标题跟随主题色 */
+/* 标题/副标题跟随主题色 */
 #app #main .title {
 	color:var(--rc-ink) !important;
 	font-family:var(--rc-disp);
 	font-weight:900;
+	font-size:30px !important;
+	line-height:1.25 !important;
 	letter-spacing:.02em;
+}
+#app #main #page .desc {
+	font-family:var(--rc-mono);
+	font-size:11px !important;
+	font-weight:500 !important;
+	letter-spacing:.2em;
+	color:var(--rc-mute-2) !important;
+	margin-top:10px !important;
 }
 #app #main .title + div,
 #app #main .sub-title { color:var(--rc-mute-2) !important; }
+
+/* 三选一：纸感接线卡（去掉原来的红/绿/蓝大色块） */
+#app #main #page .network-containers {
+	display:grid !important;
+	grid-template-columns:repeat(3, minmax(0,1fr));
+	gap:16px !important;
+	width:100%; max-width:840px;
+	margin:38px auto 0 !important;
+	padding:0;
+	align-items:stretch;
+	justify-content:center;
+}
+#app #main #page .network-container_item {
+	flex:none !important;
+	width:auto !important;
+	max-width:none !important;
+	height:auto !important;
+	padding:0 !important;
+	position:relative;
+	display:flex;
+}
+#app #main #page .network-container_item > a { display:flex; width:100%; text-decoration:none; }
+#app #main #page .network-container_item .cover { padding-top:0 !important; width:100%; display:flex; }
+#app #main #page .network-container_item .thumbnail {
+	position:relative !important;
+	inset:auto !important;
+	width:100% !important; height:auto !important;
+	min-height:216px;
+	padding:34px 20px 28px;
+	background:var(--rc-paper-2) !important;
+	border:1px solid var(--rc-line) !important;
+	border-radius:0 !important;
+	box-shadow:none !important;
+	display:flex; flex-direction:column;
+	align-items:center; justify-content:center; gap:22px;
+	transition:background-color .18s ease, border-color .18s ease,
+		transform .18s ease, box-shadow .18s ease;
+}
+/* 卡片序号 */
+#app #main #page .network-container_item::before {
+	position:absolute; top:12px; left:14px; z-index:2;
+	font-family:var(--rc-mono); font-size:9px; font-weight:600;
+	letter-spacing:.16em; color:var(--rc-mute);
+}
+#app #main #page .network-container_item:nth-child(1)::before { content:"01"; }
+#app #main #page .network-container_item:nth-child(2)::before { content:"02"; }
+#app #main #page .network-container_item:nth-child(3)::before { content:"03"; }
+/* 底部强调条：hover 时从左展开 */
+#app #main #page .network-container_item .thumbnail::after {
+	content:""; position:absolute; left:0; right:0; bottom:0; height:3px;
+	background:var(--rc-orange);
+	transform:scaleX(0); transform-origin:left center;
+	transition:transform .24s ease;
+}
+/* 图标：统一成墨色线稿，去掉原配色和投影 */
+#app #main #page .network-container_item .thumbnail svg {
+	width:56px !important; height:56px !important;
+	padding:12px; box-sizing:content-box;
+	background:var(--rc-paper);
+	border:1px solid var(--rc-line);
+	filter:none !important;
+}
+#app #main #page .network-container_item .thumbnail svg use[filter] { display:none; }
+#app #main #page .network-container_item .thumbnail svg [fill="#FFFFFF"] { fill:var(--rc-paper) !important; }
+#app #main #page .network-container_item .thumbnail svg g[fill]:not([fill="#FFFFFF"]):not([fill="black"]):not([fill="none"]),
+#app #main #page .network-container_item .thumbnail svg path[fill]:not([fill="#FFFFFF"]):not([fill="black"]):not([fill="none"]) {
+	fill:var(--rc-ink) !important;
+	transition:fill .18s ease;
+}
+#app #main #page .network-container_item .thumbnail span {
+	color:var(--rc-ink) !important;
+	font-family:var(--rc-disp);
+	font-size:15px !important;
+	font-weight:700 !important;
+	letter-spacing:.04em;
+	line-height:1.4 !important;
+	width:auto !important;
+}
+/* hover / 键盘聚焦：抬起 + 橘色硬阴影 */
+#app #main #page .network-container_item:hover .thumbnail,
+#app #main #page .network-container_item > a:focus-visible .thumbnail {
+	background:var(--rc-paper-3) !important;
+	border-color:var(--rc-ink) !important;
+	transform:translate(-3px,-3px);
+	box-shadow:5px 5px 0 var(--rc-orange) !important;
+}
+#app #main #page .network-container_item:hover .thumbnail::after,
+#app #main #page .network-container_item > a:focus-visible .thumbnail::after { transform:scaleX(1); }
+#app #main #page .network-container_item:hover .thumbnail svg g[fill]:not([fill="#FFFFFF"]):not([fill="black"]):not([fill="none"]),
+#app #main #page .network-container_item:hover .thumbnail svg path[fill]:not([fill="#FFFFFF"]):not([fill="black"]):not([fill="none"]) {
+	fill:var(--rc-orange) !important;
+}
+/* 底部“高级模式”指引 */
+#app #main #page div.info {
+	width:100% !important;
+	margin:28px 0 0 !important;
+	text-align:center;
+	font-family:var(--rc-mono) !important;
+	font-size:11px !important;
+	letter-spacing:.06em;
+	color:var(--rc-mute-2) !important;
+}
+#app #main #page div.info a {
+	color:var(--rc-orange) !important;
+	border-bottom:1px solid currentColor;
+	padding-bottom:1px;
+}
+#app #main #page div.info a:hover { color:var(--rc-ink) !important; }
+
+/* 向导表单页：内容收窄、字段标题、提示条、按钮组 */
+#app #main #page form { width:100% !important; max-width:560px !important; }
+#app #main #page label { display:block; margin-bottom:14px; }
+#app #main #page .label-key {
+	font-family:var(--rc-mono); font-size:10px !important; font-weight:600;
+	letter-spacing:.16em; text-transform:uppercase;
+	color:var(--rc-mute-2) !important;
+	margin-bottom:2px;
+}
+#app #main #page .label-key span { color:var(--rc-mute-2) !important; }
+#app #main #page .network-message,
+#app #main #page .msg {
+	width:100%; max-width:560px;
+	margin:14px 0 0 !important;
+	padding:10px 14px;
+	border-left:3px solid var(--rc-steel);
+	background:var(--rc-paper-2);
+	color:var(--rc-mute-2) !important;
+	font-family:var(--rc-mono); font-size:11px !important; line-height:1.6;
+}
+#app #main #page .msg {
+	border-left-color:var(--rc-error);
+	color:var(--rc-error) !important;
+}
+#app #main #page .network-message:empty,
+#app #main #page .msg:empty { display:none !important; }
+#app #main #page .btns {
+	display:flex !important; flex-wrap:wrap; gap:10px;
+	width:100%; max-width:560px; margin-top:22px;
+}
+#app #main #page .btns .app-btn {
+	flex:1 1 180px; width:auto !important; min-height:40px; margin:0 !important;
+}
+/* 入场：淡入上移（用 translate 属性，避免覆盖 hover 的 transform） */
+@keyframes rcWizIn { from { opacity:0; translate:0 12px; } to { opacity:1; translate:0 0; } }
+#app #main #page .network-container_item {
+	animation:rcWizIn .5s cubic-bezier(.2,.7,.3,1) both;
+}
+#app #main #page .network-container_item:nth-child(1) { animation-delay:.05s; }
+#app #main #page .network-container_item:nth-child(2) { animation-delay:.13s; }
+#app #main #page .network-container_item:nth-child(3) { animation-delay:.21s; }
+@media (prefers-reduced-motion:reduce) {
+	#app #main #page .network-container_item { animation:none; }
+}
+@media (max-width:820px) {
+	#app #main #page { padding:36px 0 32px !important; }
+	#app #main #page .network-containers { grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px !important; }
+	#app #main #page .network-container_item .thumbnail { min-height:188px; padding:28px 14px 22px; gap:18px; }
+	#app #main #page .network-container_item .thumbnail span { font-size:14px !important; }
+}
+@media (max-width:560px) {
+	#app #main #page { padding:28px 0 24px !important; }
+	#app #main #page .network-containers { grid-template-columns:minmax(0,1fr); max-width:380px; gap:10px !important; }
+	#app #main #page .network-container_item .thumbnail {
+		flex-direction:row; min-height:0; padding:18px; gap:16px; justify-content:flex-start;
+	}
+	#app #main #page .network-container_item .thumbnail svg { width:38px !important; height:38px !important; padding:9px; }
+	#app #main #page .network-container_item .thumbnail span { text-align:left; }
+	#app #main #page .network-container_item::before { display:none; }
+}
 /* 向导内页面标题与面包屑 */
 #app .tit, #app .page-title { color:var(--rc-ink) !important; font-family:var(--rc-disp); font-weight:700; }
 /* 表单页标题板：去掉死白底，文字跟随主题（原样式深色下白底浅字看不清） */
