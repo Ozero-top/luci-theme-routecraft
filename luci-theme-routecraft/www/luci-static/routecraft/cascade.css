@@ -857,11 +857,24 @@ body.modal-overlay-active #modal_overlay { opacity:1; visibility:visible; }
 	height:auto !important;
 	min-height:calc(100vh - 200px) !important;
 	max-width:1040px !important;
+	margin:0 auto !important;
 	padding:32px 0 32px !important;
 	overflow:visible !important;
 	justify-content:center !important;
 	align-content:center !important;
 }
+/* 表单类向导页：标题/提示条/输入框统一为同一条 560px 单列 */
+#app #main #page .title,
+#app #main #page .desc,
+#app #main #page form,
+#app #main #page .network-message,
+#app #main #page .msg,
+#app #main #page .msgs {
+	width:100% !important; max-width:560px !important;
+	margin-left:auto !important; margin-right:auto !important;
+	box-sizing:border-box;
+}
+#app #main #page .network-message > * { max-width:100% !important; box-sizing:border-box; }
 /* 欢迎页：报头小字，仅在有三选一卡片时出现 */
 #app #main #page:has(.network-containers)::before {
 	content:"ROUTECRAFT / NETWORK SETUP";
@@ -998,8 +1011,7 @@ body.modal-overlay-active #modal_overlay { opacity:1; visibility:visible; }
 }
 #app #main #page div.info a:hover { color:var(--rc-ink) !important; }
 
-/* 向导表单页：内容收窄、字段标题、提示条、按钮组 */
-#app #main #page form { width:100% !important; max-width:560px !important; }
+/* 向导表单页：字段标题、提示条、按钮组 */
 #app #main #page label { display:block; margin-bottom:14px; }
 #app #main #page .label-key {
 	font-family:var(--rc-mono); font-size:10px !important; font-weight:600;
