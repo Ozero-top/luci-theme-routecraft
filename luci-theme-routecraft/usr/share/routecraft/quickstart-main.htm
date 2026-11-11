@@ -2,7 +2,7 @@
 <%
   local build_url = luci.dispatcher.build_url
 -%>
-<link rel="stylesheet" href="/luci-static/routecraft/home.css?v=RCVERSION">
+<link rel="stylesheet" href="/luci-static/routecraft/home.css?v=28">
 <div id="rc-home">
 
 	<!-- HERO -->
@@ -122,7 +122,7 @@
 			<span class="rch-qc-links-label">磁盘工具</span>
 			<a href="<%=build_url('admin/nas/raid')%>">RAID 管理</a>
 			<a href="<%=build_url('admin/nas/smart')%>">S.M.A.R.T.</a>
-			<a href="<%=build_url('admin/nas/diskman')%>">磁盘管理</a>
+			<a href="<%=build_url('admin/system/diskman')%>">磁盘管理</a>
 			<a href="<%=build_url('admin/system/mounts')%>">挂载点</a>
 			<button class="rch-op-btn danger rch-qc-reboot" type="button" data-qc="maint">系统维护<span class="kbd">REBOOT</span></button>
 		</div>
@@ -144,5 +144,5 @@
 <script>
 window.rcHomeToken = "<%=token%>";
 </script>
-<script src="/luci-static/routecraft/home.js?v=RCVERSION"></script>
+<script src="/luci-static/routecraft/home.js?v=28"></script>
 <%+footer%>

@@ -13,10 +13,10 @@
 			</span>
 			<span class="rc-footer-tag">ROUTECRAFT · ISTOREOS EDITION</span>
 		</footer>
-		<script src="{{ media }}/theme.js?v=RCVERSION"></script>
-		<script>L.require('menu-routecraft', undefined, 'RCVERSION')</script>
+		<script src="{{ media }}/theme.js?v=28"></script>
+		<script>L.require('menu-routecraft', undefined, '28')</script>
 		{% else %}
-		<script src="{{ media }}/theme.js?v=RCVERSION"></script>
+		<script src="{{ media }}/theme.js?v=28"></script>
 		{% endif %}
 	</body>
 </html>

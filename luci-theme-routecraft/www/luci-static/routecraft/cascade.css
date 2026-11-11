@@ -1036,6 +1036,11 @@ body.modal-overlay-active #modal_overlay { opacity:1; visibility:visible; }
 }
 #app #main #page .network-message:empty,
 #app #main #page .msg:empty { display:none !important; }
+/* 后端返回空内容时 Vue 会留下注释节点，:empty 不生效，这里按“无任何子元素”收敛掉色条 */
+#app #main #page .network-message:not(:has(*)) {
+	border-left:0 !important; background:transparent !important;
+	padding:0 !important; margin:0 !important;
+}
 #app #main #page .btns {
 	display:flex !important; flex-wrap:wrap; gap:10px;
 	width:100%; max-width:560px; margin-top:22px;

@@ -27,7 +27,7 @@
 			})();
 		</script>
 		<meta name="viewport" content="initial-scale=1.0">
-		<link rel="stylesheet" href="{{ media }}/cascade.css?v=RCVERSION">
+		<link rel="stylesheet" href="{{ media }}/cascade.css?v=28">
 		<link rel="icon" href="{{ media }}/favicon.svg" sizes="any">
 		{% if (node?.css): %}
 		<link rel="stylesheet" href="{{ resource }}/{{ node.css }}">
