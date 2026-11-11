@@ -686,6 +686,8 @@ body.modal-overlay-active #modal_overlay { opacity:1; visibility:visible; }
 .modal > pre, .modal > textarea { white-space:pre-wrap; overflow:auto; width:100%; }
 .modal > .button-row { display:flex; justify-content:flex-end; gap:8px; }
 .modal > .button-row > button:first-of-type { margin-right:auto; }
+/* 弹窗里的左右分栏（如“上传文件”对话框）：右侧按钮组贴右，避免悬在中间 */
+.modal .right { display:flex; justify-content:flex-end; align-items:center; gap:8px; text-align:right; }
 .modal h4, .modal .modal-title {
 	font-family:var(--rc-mono); font-size:10px; letter-spacing:.22em; text-transform:uppercase;
 	color:var(--rc-mute-2); border-bottom:2px solid var(--rc-ink); padding-bottom:8px;
