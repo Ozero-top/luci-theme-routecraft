@@ -17,8 +17,8 @@ html[data-darkmode="false"] {
 	--rc-shell-3:#3B4048;
 	--rc-line:#DAD6C9;
 	--rc-line-soft:#E7E4D9;
-	--rc-mute:#94907F;
-	--rc-mute-2:#787468;
+	--rc-mute:#6E6A5E;
+	--rc-mute-2:#514E46;
 	--rc-orange:#C65D3B;
 	--rc-orange-soft:#D67A55;
 	--rc-steel:#5F7C8E;
@@ -38,8 +38,8 @@ html[data-darkmode="true"] {
 	--rc-shell-3:#2C3035;
 	--rc-line:#3A3F45;
 	--rc-line-soft:#2E3237;
-	--rc-mute:#7B776A;
-	--rc-mute-2:#9C9787;
+	--rc-mute:#9C9684;
+	--rc-mute-2:#BDB8A7;
 	--rc-orange:#D67A55;
 	--rc-orange-soft:#E08E6B;
 	--rc-steel:#7E97A8;
@@ -258,9 +258,9 @@ img { vertical-align:middle; }
 #maincontent h2 small { font-size:13px; color:var(--rc-mute-2); font-weight:400; }
 .cbi-map-descr, .cbi-section-descr, .table .tr.cbi-section-table-descr .th,
 #maincontent p {
-	font-size:13.5px; line-height:1.6; color:var(--rc-mute-2); margin:0 0 12px;
+	font-size:14px; line-height:1.65; color:var(--rc-mute-2); margin:0 0 12px;
 }
-.cbi-section-descr { font-family:var(--rc-mono); font-size:12px; }
+.cbi-section-descr { font-family:var(--rc-mono); font-size:13px; }
 .cbi-map { margin-bottom:18px; }
 
 /* tab menu (level-3+ pages) */
@@ -278,8 +278,8 @@ img { vertical-align:middle; }
 .tabs > li > a, .cbi-tabmenu > li > a {
 	white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 	color:inherit; text-decoration:none; outline:none;
-	font-family:var(--rc-mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase;
-	padding:6px 12px; line-height:28px;
+	font-family:var(--rc-mono); font-size:12.5px; letter-spacing:.06em;
+	padding:6px 14px; line-height:28px;
 }
 .tabs > li.active, .cbi-tabmenu > li:not(.cbi-tab-disabled) {
 	background:var(--rc-paper); color:var(--rc-ink);
@@ -346,6 +346,15 @@ html[data-darkmode="true"] body[data-page="admin-status-channel_analysis"] svg t
 .alert-message.success { border-left-color:var(--rc-good); }
 .alert-message.success h4 { color:var(--rc-good); }
 .alert-message.notice { border-left-color:var(--rc-mute); }
+/* LuCI 的 ui.addNotification() 把通知条插到 #maincontent 首位；
+   上面 .alert-message 的 margin 简写把左右外边距归零，覆盖了
+   .rc-main > * 的 auto 居中，导致通知条贴左、与下方内容列错位。 */
+#maincontent > .alert-message {
+	width:100%; max-width:1240px;
+	margin:0 auto 16px;
+	box-sizing:border-box;
+	align-items:center;
+}
 
 /* ---------- 5. cbi structure ---------- */
 .cbi-section, .cbi-tblsection {
@@ -617,11 +626,11 @@ input.cbi-button { width:auto; font-family:var(--rc-disp); }
 	border-bottom:1px solid var(--rc-line); font-size:13.5px;
 }
 .tr.table-titles .th, .tr.cbi-section-table-titles .th, thead th, .th {
-	font-family:var(--rc-mono); font-size:9px; letter-spacing:.18em;
-	text-transform:uppercase; color:var(--rc-mute-2); font-weight:500;
+	font-family:var(--rc-mono); font-size:11px; letter-spacing:.1em;
+	text-transform:uppercase; color:var(--rc-mute-2); font-weight:600;
 	border-bottom:2px solid var(--rc-ink);
 }
-.td { font-family:var(--rc-mono); font-size:13px; }
+.td { font-family:var(--rc-mono); font-size:13.5px; }
 .td:first-child, .td.cbi-section-table-cell:first-child { font-family:var(--rc-disp); }
 .cbi-rowstyle-2 { background:var(--rc-paper-3); }
 .cbi-section-table .tr:hover .td, .cbi-section-table .tr:hover .th { background:var(--rc-paper-3); }
@@ -648,12 +657,12 @@ table table td, .cbi-value-field table td { border:none; }
 	width:100%; border-collapse:collapse;
 }
 .cbi-section table:not(.table) th, .cbi-tblsection table:not(.table) th {
-	font-family:var(--rc-mono); font-size:9px; letter-spacing:.18em; text-transform:uppercase;
-	color:var(--rc-mute-2); font-weight:500; text-align:left;
+	font-family:var(--rc-mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+	color:var(--rc-mute-2); font-weight:600; text-align:left;
 	padding:8px 10px; border-bottom:2px solid var(--rc-ink);
 }
 .cbi-section table:not(.table) td, .cbi-tblsection table:not(.table) td {
-	padding:8px 10px; border-bottom:1px solid var(--rc-line); font-size:13px;
+	padding:8px 10px; border-bottom:1px solid var(--rc-line); font-size:13.5px;
 }
 
 /* section create / remove */
@@ -729,7 +738,7 @@ body.modal-overlay-active #modal_overlay { opacity:1; visibility:visible; }
 }
 .cbi-progressbar::before {
 	position:absolute; top:-1.5em; left:0; content:attr(title);
-	font-family:var(--rc-mono); font-size:9px; letter-spacing:.14em; color:var(--rc-mute-2);
+	font-family:var(--rc-mono); font-size:11px; letter-spacing:.06em; color:var(--rc-mute-2);
 	white-space:pre; overflow:hidden; text-overflow:ellipsis;
 }
 
@@ -741,7 +750,7 @@ body.modal-overlay-active #modal_overlay { opacity:1; visibility:visible; }
 }
 .ifacebox .ifacebox-head {
 	border-bottom:1px solid var(--rc-line); background:var(--rc-paper-3);
-	color:var(--rc-ink); padding:3px 6px; font-family:var(--rc-mono); font-size:10px;
+	color:var(--rc-ink); padding:3px 6px; font-family:var(--rc-mono); font-size:11.5px;
 }
 .ifacebox .ifacebox-head.active { background:var(--rc-orange); color:#26292E; }
 .ifacebox .ifacebox-body { padding:.4em .5em; }
@@ -1170,4 +1179,87 @@ body.modal-overlay-active #modal_overlay { opacity:1; visibility:visible; }
 	.cbi-value-field { margin-left:0; width:100%; }
 	.tabs > li, .cbi-tabmenu > li { max-width:100%; }
 	.rc-footer-tag { display:none; }
+}
+
+/* ---------- 12. 状态 > 概况：双列仪表盘 ---------- */
+body[data-page="admin-status-overview"] #view {
+	display:grid; grid-template-columns:repeat(2, minmax(0,1fr));
+	gap:16px; align-items:stretch;
+}
+/* 同一行的卡片高度对齐，避免内存/存储、端口/网络高低不齐 */
+body[data-page="admin-status-overview"] #view > .cbi-section { margin-bottom:0; height:100%; }
+body[data-page="admin-status-overview"] #view > .cbi-section:nth-child(1),
+body[data-page="admin-status-overview"] #view > .cbi-section:nth-child(6),
+body[data-page="admin-status-overview"] #view > .cbi-section:nth-child(9) { grid-column:1 / -1; }
+
+/* 系统信息：竖排 9 行压成每行 4 组键值 */
+body[data-page="admin-status-overview"] #view > .cbi-section:nth-child(1) .table {
+	display:grid;
+	grid-template-columns:repeat(3, max-content minmax(0,1fr));
+	column-gap:26px; row-gap:8px;
+}
+body[data-page="admin-status-overview"] #view > .cbi-section:nth-child(1) .table > .tr { display:contents; }
+body[data-page="admin-status-overview"] #view > .cbi-section:nth-child(1) .table > .tr > .td {
+	display:block; padding:2px 0; border:none; white-space:normal; overflow-wrap:anywhere;
+}
+body[data-page="admin-status-overview"] #view > .cbi-section:nth-child(1) .table > .tr > .td:first-child {
+	font-family:var(--rc-mono); font-size:11px; letter-spacing:.06em; color:var(--rc-mute-2);
+	white-space:nowrap;
+}
+
+/* 内存 / 存储：标签列收窄，进度条吃满剩余宽度 */
+body[data-page="admin-status-overview"] #view > .cbi-section:nth-child(2) .tr > .td:first-child,
+body[data-page="admin-status-overview"] #view > .cbi-section:nth-child(3) .tr > .td:first-child {
+	width:72px; white-space:nowrap;
+}
+body[data-page="admin-status-overview"] #view > .cbi-section:nth-child(2) .cbi-progressbar,
+body[data-page="admin-status-overview"] #view > .cbi-section:nth-child(3) .cbi-progressbar { min-width:0; }
+
+/* 顺序调整：UPNP 端口映射在前，DHCP 租约排最后 */
+body[data-page="admin-status-overview"] #view > .cbi-section:nth-child(6) { order:2; }
+
+/* 租约表默认折叠：theme.js 插入展开按钮并给容器加 rc-lease-body */
+.rc-lease-toggle {
+	display:flex; align-items:center; gap:10px; width:100%;
+	margin:2px 0 12px; padding:9px 14px;
+	background:var(--rc-paper); border:1px solid var(--rc-line); border-left:3px solid var(--rc-orange);
+	font-family:var(--rc-mono); font-size:12px; letter-spacing:.08em; color:var(--rc-ink);
+	cursor:pointer; text-align:left; transition:background-color .15s;
+}
+.rc-lease-toggle:hover { background:var(--rc-paper-2); }
+.rc-lease-toggle b { font-weight:700; }
+.rc-lease-toggle i { margin-left:auto; font-style:normal; color:var(--rc-orange); font-weight:700; }
+.rc-lease-body { display:none; }
+.rc-lease-open .rc-lease-body { display:block; }
+
+/* 易有云状态并入端口状态卡：去掉独立卡片外观，只留一条分隔线 */
+body[data-page="admin-status-overview"] .rc-ports-merged > .cbi-section {
+	margin:18px 0 0; padding:14px 0 0;
+	background:transparent; border:none; border-top:1px dashed var(--rc-line);
+}
+body[data-page="admin-status-overview"] .rc-ports-merged > .cbi-section legend {
+	display:block; margin:0 0 12px; padding:0 0 0 10px;
+	border-left:3px solid var(--rc-orange); font-size:13px;
+}
+/* 原 include 用 <br> 堆行距，合并后产生大片空白 */
+body[data-page="admin-status-overview"] .rc-ports-merged > .cbi-section br { display:none; }
+/* 状态一行，两个按钮横向并列 */
+body[data-page="admin-status-overview"] .rc-ports-merged > .cbi-section p {
+	display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:0;
+}
+/* 状态与两个按钮同一行：按钮在前，状态文字跟在右侧 */
+body[data-page="admin-status-overview"] .rc-ports-merged > .cbi-section p em {
+	order:3; flex:0 0 auto; font-style:normal; font-size:13px; font-weight:700;
+	white-space:nowrap;
+}
+body[data-page="admin-status-overview"] .rc-ports-merged > .cbi-section p input.btn {
+	order:1; margin:0; flex:0 0 auto;
+}
+
+@media (max-width:900px) {
+	body[data-page="admin-status-overview"] #view { grid-template-columns:minmax(0,1fr); }
+	body[data-page="admin-status-overview"] #view > .cbi-section { grid-column:auto !important; }
+	body[data-page="admin-status-overview"] #view > .cbi-section:nth-child(1) .table {
+		grid-template-columns:repeat(2, max-content minmax(0,1fr));
+	}
 }

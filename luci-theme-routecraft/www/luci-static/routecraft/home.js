@@ -606,14 +606,32 @@
 		}
 	});
 
+	/* 网关选项：value 必须是 gatewaySels[].gateway（后端据此定位 dhcp section），
+	   标题仅作展示；tagName/tagTitle 随选中的网关带出。 */
+	function dmGwSels() {
+		var sels = (dmState.global && dmState.global.dhcpGlobal && dmState.global.dhcpGlobal.gatewaySels) || [];
+		return sels.length ? sels : [{ title: 'myself', gateway: 'myself' }];
+	}
+	function dmGwLabel(title) {
+		return ({ default: '默认网关', parent: '上级路由', myself: '本机（自动）', bypass: '旁路由', floatip: '浮动网关' })[title] || title || '—';
+	}
+	function dmGwPick(sels, gw) {
+		for (var i = 0; i < sels.length; i++) if (sels[i].gateway === gw) return sels[i];
+		return sels[0];
+	}
+
 	function dmUnbindStatic(item) {
 		if (!item) return;
+		/* 后端按 action 组装 uci 命令，缺 action 会直接报 empty commands */
 		istorePost('/lanctrl/staticDeviceConfig/', {
-			ip: item.assignedIP, mac: item.assignedMac,
 			hostname: item.hostname || '',
-			assignedMac: item.assignedMac,
-			bindIP: false, assignedIP: '',
-			dhcpGateway: 'myself'
+			assignedIP: item.assignedIP || '',
+			assignedMac: item.assignedMac || '',
+			tagTitle: item.tagTitle || '',
+			tagName: item.tagName || '',
+			bindIP: item.bindIP || false,
+			dhcpGateway: item.dhcpGateway || '',
+			action: 'delete'
 		}).then(function () {
 			modalAlert('ok', '已解除绑定');
 			dmLoadAll();
@@ -623,9 +641,10 @@
 	}
 
 	function dmStaticDialog(d) {
-		var gws = (dmState.global && dmState.global.dhcpGlobal && dmState.global.dhcpGlobal.gatewaySels) || [{ title: 'myself' }];
+		var gws = dmGwSels();
 		var cur = d.staticAssigned || {};
-		var bind = !!cur.assignedIP;
+		var bind = cur.bindIP === undefined ? !!cur.assignedIP : !!cur.bindIP;
+		var pick = dmGwPick(gws, cur.dhcpGateway);
 		openModal('静态分配 · ' + (d.hostname || d.ip),
 			'<div class="rch-f-row"><label>主机名称</label><input type="text" value="' + esc(d.hostname || '') + '" disabled></div>' +
 			'<div class="rch-f-row"><label>MAC 地址</label><input type="text" value="' + esc(d.mac) + '" disabled></div>' +
@@ -635,8 +654,9 @@
 				'<div class="rch-f-row"><label>静态 IP 地址</label><input type="text" id="rch-sa-ip" value="' + esc(cur.assignedIP || d.ip) + '"></div>' +
 			'</div>' +
 			'<div class="rch-f-row"><label>网关</label><select id="rch-sa-gw">' + gws.map(function (g) {
-				var v = g.title || g.ip || g;
-				return '<option value="' + esc(v) + '">' + esc(v === 'myself' ? '本机（自动）' : v) + '</option>';
+				return '<option value="' + esc(g.gateway) + '"' + (g === pick ? ' selected' : '') +
+					' data-tagtitle="' + esc(g.tagTitle || '') + '" data-tagname="' + esc(g.tagName || '') + '">' +
+					esc(dmGwLabel(g.title)) + '</option>';
 			}).join('') + '</select></div>' +
 			'<p class="rch-f-note">绑定后该设备每次上线都会拿到同一个 IP；取消勾选则恢复动态分配。</p>' +
 			'<div class="rch-modal-actions">' +
@@ -651,14 +671,21 @@
 			var on = $('rch-sa-bind').checked;
 			var ip = $('rch-sa-ip').value.trim();
 			if (on && !ipOk(ip)) { modalAlert('err', '静态 IP 地址格式不正确'); return; }
+			var sel = $('rch-sa-gw');
+			var opt = sel.options[sel.selectedIndex] || {};
 			var btn = this;
 			btn.disabled = true; btn.textContent = '保存中…';
+			/* 字段与 action 必须与原 quickstart 一致：缺 action 后端无命令可执行，
+			   直接返回 empty commands，正是「保存失败」的来源。 */
 			istorePost('/lanctrl/staticDeviceConfig/', {
-				ip: d.ip, mac: d.mac, hostname: d.hostname || '',
-				assignedMac: d.mac,
-				bindIP: on,
+				hostname: d.hostname || d.mac || '',
 				assignedIP: on ? ip : '',
-				dhcpGateway: $('rch-sa-gw').value
+				assignedMac: d.mac,
+				tagTitle: (opt.getAttribute && opt.getAttribute('data-tagtitle')) || cur.tagTitle || '',
+				tagName: (opt.getAttribute && opt.getAttribute('data-tagname')) || cur.tagName || '',
+				bindIP: on,
+				dhcpGateway: sel.value,
+				action: 'add'
 			}).then(function () {
 				modalAlert('ok', '保存成功');
 				btn.disabled = false; btn.textContent = '保存';
@@ -904,6 +931,22 @@
 		});
 	}
 
+	/* ---------- 备份 / 固件升级 ---------- */
+	function openFlash() {
+		openModal('备份 / 固件升级',
+			'<p class="rch-f-note" style="margin:0 0 6px">在线升级从服务器拉取固件；手动备份/升级可下载当前配置备份或上传固件文件。</p>' +
+			'<div class="rch-modal-actions">' +
+				'<button class="rch-btn ghost" id="rch-flash-manual">手动备份 / 升级</button>' +
+				'<button class="rch-btn" id="rch-flash-ota">在线升级</button>' +
+			'</div>');
+		$('rch-flash-ota').addEventListener('click', function () {
+			location.href = '/cgi-bin/luci/admin/system/ota';
+		});
+		$('rch-flash-manual').addEventListener('click', function () {
+			location.href = '/cgi-bin/luci/admin/system/flash';
+		});
+	}
+
 	/* ---------- 快捷设置初始化 ---------- */
 	function loadQC() {
 		document.querySelectorAll('[data-qc]').forEach(function (btn) {
@@ -913,16 +956,10 @@
 				else if (act === 'dns') openDns();
 				else if (act === 'src') openSrc();
 				else if (act === 'lan') openLan();
+				else if (act === 'flash') openFlash();
 				else if (act === 'maint') openMaint();
 			});
 		});
-		/* 终端链接：与原版一致，指向 ttyd */
-		var ttyd = $('rch-qc-ttyd');
-		if (ttyd) {
-			ttyd.href = 'http://' + location.hostname + ':7681';
-			ttyd.target = '_blank';
-			ttyd.rel = 'noopener';
-		}
 		/* 按钮角标预载 */
 		istore('/network/device/list/').then(function (r) {
 			$('rch-qc-devcount').textContent = ((r && r.devices) || []).length + ' 台';
