@@ -5,25 +5,24 @@ set luci.themes.RouteCraft=/luci-static/routecraft
 set luci.main.mediaurlbase=/luci-static/routecraft
 commit luci
 EOF
-# 替换 quickstart 首页为 RouteCraft 版本（原文件备份为 .rcbak）
+
 VIEW=/usr/lib/lua/luci/view/quickstart/main.htm
-if [ -f "$VIEW" ]; then
-	[ -f "$VIEW.rcbak" ] || cp "$VIEW" "$VIEW.rcbak"
-	cp /usr/share/routecraft/quickstart-main.htm "$VIEW"
-fi
-# wizard.htm 在 24.10 原版就有，25.12 没有——统一处理：
-# 如果 wizard.htm 不存在，从刚备份的原版 main.htm 复制创建（作为向导 Vue 壳）
-# 两个版本最终都让控制器 render("quickstart/wizard")
-WIZ=/usr/lib/lua/luci/view/quickstart/wizard.htm
-if [ ! -f "$WIZ" ] && [ -f "$VIEW.rcbak" ]; then
-	cp "$VIEW.rcbak" "$WIZ"
-fi
-# 网络向导等入口改用 wizard.htm（控制器备份为 .rcbak）
 CTRL=/usr/lib/lua/luci/controller/quickstart.lua
-if [ -f "$CTRL" ]; then
-	[ -f "$CTRL.rcbak" ] || cp "$CTRL" "$CTRL.rcbak"
-	sed -i 's#render("quickstart/main"#render("quickstart/wizard"#' "$CTRL"
+HOME_VIEW=/usr/lib/lua/luci/view/quickstart/home.htm
+RC_HOME=/usr/lib/lua/luci/view/quickstart/routecraft.htm
+
+# 旧版迁移：旧版本覆盖过 main.htm 并改写控制器，先还原成原版
+[ -f "$VIEW.rcbak" ] && mv -f "$VIEW.rcbak" "$VIEW"
+[ -f "$CTRL.rcbak" ] && mv -f "$CTRL.rcbak" "$CTRL"
+
+# 主题感知首页：只替换首页入口，网络向导/无线向导继续使用原版 main.htm
+if [ -f "$HOME_VIEW" ] && [ -f /usr/share/routecraft/quickstart-home.htm ] \
+	&& [ -f /usr/share/routecraft/quickstart-main.htm ]; then
+	[ -f "$HOME_VIEW.rcbak" ] || cp "$HOME_VIEW" "$HOME_VIEW.rcbak"
+	cp -f /usr/share/routecraft/quickstart-home.htm "$HOME_VIEW"
+	cp -f /usr/share/routecraft/quickstart-main.htm "$RC_HOME"
 fi
+
 # 让 rpcd 重新读取 ACL（network.device status 授权）
 /etc/init.d/rpcd reload >/dev/null 2>&1
 exit 0

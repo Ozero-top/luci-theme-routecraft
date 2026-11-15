@@ -1,0 +1,22 @@
+<%
+  -- 首页分发：只有 quickstart 首页走这里，网络向导/无线向导仍用原版 main.htm。
+  local uci = require "luci.model.uci".cursor()
+  local fs = require "nixio.fs"
+  local theme = (uci:get("luci", "main", "mediaurlbase") or ""):gsub("/+$", "")
+  local use_routecraft = (theme == "/luci-static/routecraft")
+      and fs.access("/usr/lib/lua/luci/view/quickstart/routecraft.htm")
+
+  local lang = "en"
+  if not use_routecraft then
+      local i18n = require "luci.i18n"
+      lang = i18n.translate("quickstart_vue_lang")
+      if lang == "quickstart_vue_lang" or lang == "" then
+          lang = "en"
+      end
+  end
+-%>
+<% if use_routecraft then -%>
+<% luci.template.render("quickstart/routecraft") %>
+<% else -%>
+<% luci.template.render("quickstart/main", {prefix=luci.dispatcher.build_url("admin", "quickstart"), lang=lang}) %>
+<% end -%>

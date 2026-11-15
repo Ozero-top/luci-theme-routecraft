@@ -47,7 +47,7 @@ ROUTECRAFT_MIRROR=https://your.proxy/ sh install.sh
 ./install.sh uninstall
 ```
 
-自动还原 main.htm、控制器、UCI 主题，删除写入的文件并清模板缓存。quickstart 原版功能会完整回来。
+自动还原 home.htm、main.htm、控制器、UCI 主题，删除写入的文件并清模板缓存。quickstart 原版功能会完整回来。
 
 ## 状态
 
@@ -62,7 +62,7 @@ ROUTECRAFT_MIRROR=https://your.proxy/ sh install.sh
 - 登录页换了独立模板，深色网格 + 居中卡
 - 侧栏重新做了编号手风琴菜单，顶栏深色 + MODE 切色
 - quickstart 首页整个推翻重写成仪表盘：HERO 速率框、核心指标四卡、实时流量曲线、物理网口列表、服务状态、快捷设置（里面嵌了完整的局域网设备管理、DNS 配置、软件源切换等弹窗）
-- 网络向导 / 无线向导功能保留，只换界面。首页和向导原本共用模板，装的时候把向导入口单独指到 wizard.htm
+- 首页按主题自动切换：选中 RouteCraft 显示仪表盘，切回 argon 等其它主题显示原版 Vue 首页；网络向导 / 无线向导始终使用原版页面，只换界面
 - 网口配置页、RAID、S.M.A.R.T. 这些 Vue 内表格页面也做了主题覆盖（硬编码浅底会被深模式打脸）
 
 ## 源码结构
@@ -75,7 +75,8 @@ luci-theme-routecraft/
 │   ├── home.css / home.js  quickstart 替换首页
 │   └── theme.js            MODE 切换 / 移动端抽屉
 ├── usr/share/routecraft/
-│   └── quickstart-main.htm 首页模板（postinst 复制到 quickstart/main.htm）
+│   ├── quickstart-home.htm 首页分发（按当前主题选择仪表盘或原版首页）
+│   └── quickstart-main.htm RouteCraft 仪表盘（复制为 quickstart/routecraft.htm）
 ├── usr/share/rpcd/acl.d/
 │   └── luci-theme-routecraft.json  首页 ubus 取数权限
 ├── www/luci-static/resources/

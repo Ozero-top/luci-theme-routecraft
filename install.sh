@@ -17,7 +17,7 @@
 #
 # 说明：直接把源码文件写入系统，不生成 ipk / apk。
 #       24.10 与 25.12 的目录布局一致，脚本按实际存在的文件自适应，
-#       并对 quickstart 首页 / 向导入口做与安装包完全相同的处理。
+#       并按当前主题安装 quickstart 首页（RouteCraft 仪表盘 / 原版首页自动切换）。
 #       在线下载源码时会自动尝试国内加速镜像，可用 ROUTECRAFT_MIRROR 指定自定义前缀。
 # ============================================================
 
@@ -32,7 +32,8 @@ RCBAK_SUFFIX=".rcorig"
 MIRRORS="https://gh-proxy.com/ https://ghproxy.net/ https://ghfast.top/"
 
 VIEW="/usr/lib/lua/luci/view/quickstart/main.htm"
-WIZ="/usr/lib/lua/luci/view/quickstart/wizard.htm"
+HOME_VIEW="/usr/lib/lua/luci/view/quickstart/home.htm"
+RC_HOME="/usr/lib/lua/luci/view/quickstart/routecraft.htm"
 CTRL="/usr/lib/lua/luci/controller/quickstart.lua"
 
 # ---------- 基础输出 ----------
@@ -196,29 +197,25 @@ commit luci
 EOF
 	[ $? -eq 0 ] && ok "luci.main.mediaurlbase = /luci-static/routecraft"
 
-	# quickstart 首页替换（与安装包 postinst 逻辑一致）
-	if [ -f "$VIEW" ] && [ -f /usr/share/routecraft/quickstart-main.htm ]; then
-		[ -f "$VIEW.rcbak" ] || cp "$VIEW" "$VIEW.rcbak"
-		cp -f /usr/share/routecraft/quickstart-main.htm "$VIEW"
-		ok "已替换 quickstart 首页（原文件备份为 main.htm.rcbak）"
+	# 旧版迁移：旧版本覆盖过 main.htm 并改写控制器，先还原成原版
+	if [ -f "$VIEW.rcbak" ]; then
+		mv -f "$VIEW.rcbak" "$VIEW"
+		ok "已还原被旧版覆盖的 quickstart/main.htm"
+	fi
+	if [ -f "$CTRL.rcbak" ]; then
+		mv -f "$CTRL.rcbak" "$CTRL"
+		ok "已还原被旧版改写的 quickstart 控制器"
 	fi
 
-	if [ "$FAMILY" = "new" ]; then
-		# 25.12：没有 wizard.htm 时用原版 main.htm 生成向导壳
-		if [ ! -f "$WIZ" ] && [ -f "$VIEW.rcbak" ]; then
-			cp "$VIEW.rcbak" "$WIZ"
-			ok "25.12 适配：已从原版 main.htm 生成 wizard.htm"
-		fi
+	# 主题感知首页：仅替换首页入口，向导等页面继续使用原版 main.htm
+	if [ -f "$HOME_VIEW" ] && [ -f /usr/share/routecraft/quickstart-home.htm ] \
+		&& [ -f /usr/share/routecraft/quickstart-main.htm ]; then
+		[ -f "$HOME_VIEW.rcbak" ] || cp "$HOME_VIEW" "$HOME_VIEW.rcbak"
+		cp -f /usr/share/routecraft/quickstart-home.htm "$HOME_VIEW"
+		cp -f /usr/share/routecraft/quickstart-main.htm "$RC_HOME"
+		ok "已安装主题感知首页（RouteCraft / 原版随主题切换）"
 	else
-		[ -f "$WIZ" ] && ok "24.10 适配：wizard.htm 已随源码写入"
-	fi
-
-	if [ -f "$CTRL" ]; then
-		[ -f "$CTRL.rcbak" ] || cp "$CTRL" "$CTRL.rcbak"
-		sed -i 's#render("quickstart/main"#render("quickstart/wizard"#' "$CTRL"
-		ok "向导入口已指向 wizard.htm（控制器备份为 quickstart.lua.rcbak）"
-	else
-		warn "未找到 quickstart 控制器，跳过向导入口处理"
+		warn "未找到 quickstart 首页模板，跳过首页处理"
 	fi
 
 	echo
@@ -247,6 +244,8 @@ do_uninstall() {
 	info "还原 quickstart 首页与控制器..."
 	[ -f "$VIEW.rcbak" ] && mv -f "$VIEW.rcbak" "$VIEW" && ok "main.htm 已还原"
 	[ -f "$CTRL.rcbak" ] && mv -f "$CTRL.rcbak" "$CTRL" && ok "quickstart.lua 已还原"
+	[ -f "$HOME_VIEW.rcbak" ] && mv -f "$HOME_VIEW.rcbak" "$HOME_VIEW" && ok "home.htm 已还原"
+	rm -f "$RC_HOME"
 
 	info "还原主题 UCI..."
 	CURRENT="$(uci -q get luci.main.mediaurlbase)"
@@ -285,10 +284,13 @@ do_uninstall() {
 		rm -rf /usr/share/ucode/luci/template/themes/routecraft
 		rm -rf /usr/share/routecraft
 		rm -f /usr/share/rpcd/acl.d/luci-theme-routecraft.json
-		rm -f /usr/lib/lua/luci/view/quickstart/wizard.htm
+		[ -f "$HOME_VIEW.rcbak" ] && mv -f "$HOME_VIEW.rcbak" "$HOME_VIEW"
+		rm -f "$RC_HOME"
 		rm -f /etc/uci-defaults/30_luci-theme-routecraft
 		ok "已按默认路径清理"
 	fi
+	# 主题共享目录只由本主题使用，整体清理，避免 .rcorig 残留导致目录删不掉
+	rm -rf /usr/share/routecraft
 	rm -f "$MANIFEST"
 
 	clear_caches
